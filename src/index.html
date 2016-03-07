@@ -7,6 +7,12 @@
   <link href='css/style.css' rel=stylesheet>
 </head>
 <body>
+  <div class="dropdown">
+    Mouse Over
+    <div class="dropdown-content" data-bind="foreach: places">
+      <div data-bind="text: suburb, click: $parent.filterBySuburb"></div>
+    </div>
+  </div>
   <div>
     <ul data-bind="foreach: places">
       <li data-bind="text: name"></li>

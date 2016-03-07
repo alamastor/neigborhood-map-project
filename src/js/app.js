@@ -3,6 +3,11 @@ onload = function() {
     function ViewModel() {
         var self = this;
         self.places = ko.observableArray();
+
+        self.filterBySuburb = function(data, event) {
+            var i = data;
+            var j = event;
+        }
     }
     var viewModel = new ViewModel();
 
@@ -30,6 +35,7 @@ onload = function() {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
             console.log(results.length);
             for (var i = 0; i < results.length; i++) {
+                results[i].suburb = results[i].vicinity.split(',')[1].trim()
                 createMarker(results[i]);
                 viewModel.places.push(results[i]);
             }
