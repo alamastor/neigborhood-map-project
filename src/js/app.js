@@ -89,13 +89,20 @@ onload = function() {
         // Make marker a property of place,
         // so it can be easily updated based on
         // the properties of the place
-        place.marker = new google.maps.Marker({
+        place.marker = new Marker({
             position: place.geometry.location,
             map: map,
-            title: place.name,
+            icon: {
+                path: SQUARE_PIN,
+                fillColor: '#00CCBB',
+                fillOpacity: 0.5,
+                strokeColor: '',
+                strokeWeight: 0
+            },
+            map_icon_label: '<span class="map-icon map-icon-bicycle-store"></span>',
         });
         var infowindow = new google.maps.InfoWindow({
-                content: place.marker.title
+                content: 'XXX',
             })
         place.marker.addListener('click', function() {
             infowindow.open(map, place.marker);
