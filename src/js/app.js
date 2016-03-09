@@ -4,7 +4,12 @@ onload = function() {
         var self = this;
         self.places = ko.observableArray();
 
+        // Set suburbFilter to display only result from that suburb
         self.suburbFilter = ko.observable('');
+        self.setSuburbFilter = function(data, event) {
+            self.suburbFilter(data);
+        };
+
         self.filteredPlaces = ko.computed(function() {
             var filtered = [];
             var uniqueSuburbs = new Set();
@@ -34,9 +39,6 @@ onload = function() {
             return Array.from(suburbSet).sort();
         });
 
-        self.setSuburbFilter = function(data, event) {
-            self.suburbFilter(data);
-        }
     }
     var viewModel = new ViewModel();
 
