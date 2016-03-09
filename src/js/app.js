@@ -3,10 +3,27 @@ onload = function() {
     function ViewModel() {
         var self = this;
         self.places = ko.observableArray();
+        self.suburbFilter = ko.observable('');
+        self.filteredPlaces = ko.computed(function() {
+            var filtered = [];
+            var uniqueSuburbs = new Set();
+            self.places().forEach(function(place) {
+                if (self.suburbFilter() == '' || place.suburb == self.suburbFilter()) {
+                    filtered.push(place);
+                }
+            });
+            return filtered;
+        });
+        self.uniqueSuburbs = ko.computed(function() {
+            var suburbSet = new Set();
+            self.places().forEach(function(place) {
+                suburbSet.add(place.suburb);
+            });
+            return Array.from(suburbSet).sort();
+        });
 
-        self.filterBySuburb = function(data, event) {
-            var i = data;
-            var j = event;
+        self.setSuburbFilter = function(data, event) {
+            self.suburbFilter(data);
         }
     }
     var viewModel = new ViewModel();

@@ -17,6 +17,7 @@ html, body {
   display: none;
   position: absolute;
   background-color: #fff;
+  z-index: 1;
 }
 
 .dropdown:hover .dropdown-content {

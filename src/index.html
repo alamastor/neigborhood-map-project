@@ -9,12 +9,12 @@
 <body>
   <div class="dropdown">
     Mouse Over
-    <div class="dropdown-content" data-bind="foreach: places">
-      <div data-bind="text: suburb, click: $parent.filterBySuburb"></div>
+    <div class="dropdown-content" data-bind="foreach: uniqueSuburbs">
+      <div data-bind="text: $data, click: $parent.setSuburbFilter"></div>
     </div>
   </div>
   <div>
-    <ul data-bind="foreach: places">
+    <ul data-bind="foreach: filteredPlaces">
       <li data-bind="text: name"></li>
     </ul>
   </div>
