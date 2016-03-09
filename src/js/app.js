@@ -3,6 +3,7 @@ onload = function() {
     function ViewModel() {
         var self = this;
         self.places = ko.observableArray();
+
         self.suburbFilter = ko.observable('');
         self.filteredPlaces = ko.computed(function() {
             var filtered = [];
@@ -14,6 +15,17 @@ onload = function() {
             });
             return filtered;
         });
+        // Hide markers which aren't in selected suburb
+        self.suburbFilter.subscribe(function(suburbFilter) {
+            self.places().forEach(function(place) {
+                if (place.suburb == suburbFilter) {
+                    place.marker.setMap(map);
+                } else {
+                    place.marker.setMap(null);
+                }
+            });
+        });
+
         self.uniqueSuburbs = ko.computed(function() {
             var suburbSet = new Set();
             self.places().forEach(function(place) {
@@ -72,16 +84,19 @@ onload = function() {
 
     function createMarker(place)
     {
-        var marker = new google.maps.Marker({
+        // Make marker a property of place,
+        // so it can be easily updated based on
+        // the properties of the place
+        place.marker = new google.maps.Marker({
             position: place.geometry.location,
             map: map,
             title: place.name,
         });
         var infowindow = new google.maps.InfoWindow({
-                content: marker.title
+                content: place.marker.title
             })
-        marker.addListener('click', function() {
-            infowindow.open(map, marker);
+        place.marker.addListener('click', function() {
+            infowindow.open(map, place.marker);
         });
     }
 
