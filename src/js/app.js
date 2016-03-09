@@ -1,4 +1,4 @@
-onload = function() {
+$(function() {
     'use strict';
     function ViewModel() {
         var self = this;
@@ -46,11 +46,10 @@ onload = function() {
     var map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: -37.8647, lng: 144.9696},
         scrollwheel: true,
-        zoom: 12,
-        mapTypeId: google.maps.MapTypeId.HYBRID
+        zoom: 14,
+        mapTypeId: google.maps.MapTypeId.TERRAIN,
     });
     // TODO: handle map fail
-    map.setTilt(45);
 
     var home = new google.maps.LatLng(-37.867556, 144.980302);
     var request = {
@@ -93,7 +92,7 @@ onload = function() {
             position: place.geometry.location,
             map: map,
             icon: {
-                path: SQUARE_PIN,
+                path: MAP_PIN,
                 fillColor: '#00CCBB',
                 fillOpacity: 0.5,
                 strokeColor: '',
@@ -109,8 +108,30 @@ onload = function() {
         });
     }
 
+    // Foursquare tests
+    var url = 'https://api.foursquare.com/v2/venues/search';
+    var data = {
+        client_id: fourSquareTokens.clientId,
+        client_secret: fourSquareTokens.clientSecret,
+        ll: '-37.8647,144.9696',
+        query: 'bicycle_store',
+        v: 20160310,
+    }
+    var request = $.ajax(url, {
+        dataType: 'json',
+        data: data,
+    });
+    request.done(function(msg) {
+        console.log('done');
+        console.log(msg);
+    });
+    request.fail(function(jqXHR, textStatus) {
+        console.log('failed');
+        console.log(jqXHR);
+        console.log(textStatus);
+    });
 
     ko.applyBindings(viewModel);
-}
+});
 
 
