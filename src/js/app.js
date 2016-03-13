@@ -48,18 +48,29 @@ $(function() {
             return Array.from(suburbSet).sort();
         });
 
+        self.sortPlaces = function () {
+            self.places.sort(function(a, b) {
+                if (a.name < b.name) {
+                    return -1;
+                }
+                if (a.name > b.name) {
+                    return 1;
+                }
+                return 0;
+            });
+        };
+
     }
     var viewModel = new ViewModel();
     ko.applyBindings(viewModel);
 
 
-    function createMarker(place)
-    {
+    function createMarker(place) {
         // Make marker a property of place,
         // so it can be easily updated based on
         // the properties of the place
         place.marker = new Marker({
-            position: place.geometry.location,
+            position: place.latLon,
             map: map,
             icon: {
                 path: MAP_PIN,
@@ -70,13 +81,24 @@ $(function() {
             },
             map_icon_label: '<span class="map-icon map-icon-bicycle-store"></span>',
         });
-        var infowindow = new google.maps.InfoWindow({
-                content: 'XXX',
-            })
         place.marker.addListener('click', function() {
-            infowindow.open(map, place.marker);
+            closeAllInfoWindows();
+            place.infoWindow.open(map, place.marker);
         });
     }
+
+    function createInfoWindow(place) {
+        place.infoWindow = new google.maps.InfoWindow({
+                content: place.name,
+        });
+    }
+
+    function closeAllInfoWindows() {
+        viewModel.places().forEach(function(place) {
+            place.infoWindow.close();
+        });
+    }
+
 
     /**
      * API requests
@@ -94,22 +116,26 @@ $(function() {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
             console.log(results);
             for (var i = 0; i < results.length; i++) {
-                results[i].suburb = results[i].vicinity.split(',')[1].trim()
-                createMarker(results[i]);
-                viewModel.places.push(results[i]);
+                var place = googlePlaceToPlace(results[i])
+                createMarker(place);
+                createInfoWindow(place);
+                viewModel.places.push(place);
             }
-            viewModel.places.sort(function(a, b) {
-                if (a.name < b.name) {
-                    return -1;
-                }
-                if (a.name > b.name) {
-                    return 1;
-                }
-                return 0;
-            });
+            viewModel.sortPlaces();
         } else {
             // TODO: handle request fail
         }
+    }
+
+    function googlePlaceToPlace(googlePlace) {
+        var place = {};
+        place.latLon = {
+            lat: googlePlace.geometry.location.lat(),
+            lng: googlePlace.geometry.location.lng()
+        };
+        place.name = googlePlace.name;
+        place.suburb = googlePlace.vicinity.split(',')[1].trim();
+        return place;
     }
 
     // Foursquare search
@@ -124,8 +150,14 @@ $(function() {
         },
     });
     request.done(function(msg) {
-        console.log('done');
         console.log(msg);
+        msg.response.venues.forEach(function(venue) {
+            var place = fourSqrVenueToPlace(venue);
+            createMarker(place);
+            createInfoWindow(place);
+            viewModel.places.push(place);
+        });
+        viewModel.sortPlaces();
     });
     request.fail(function(jqXHR, textStatus) {
         console.log('failed');
@@ -133,6 +165,19 @@ $(function() {
         console.log(textStatus);
     });
 
+    function fourSqrVenueToPlace(venue) {
+        var place = {};
+        place.latLon = {
+            lat: venue.location.lat,
+            lng: venue.location.lng
+        };
+        place.name = venue.name;
+        if (venue.location.hasOwnProperty('city')) {
+            place.suburb = venue.location.city.split(',')[0].trim();
+        }
+
+        return place;
+    }
 
     // Yelp API
 
@@ -181,6 +226,13 @@ $(function() {
     });
     request.done(function(msg) {
         console.log(msg);
+        msg.businesses.forEach(function(business) {
+            var place = yelpBusToPlace(business);
+            createMarker(place);
+            createInfoWindow(place);
+            viewModel.places.push(place);
+        });
+        viewModel.sortPlaces();
     });
     request.fail(function(jqXHR, textStatus) {
         console.log('failed');
@@ -191,5 +243,16 @@ $(function() {
         console.log('GOT CBb');
     }
 
+    function yelpBusToPlace(business) {
+        var place = {};
+        place.latLon = {
+            lat: business.location.coordinate.latitude,
+            lng: business.location.coordinate.longitude
+        };
+        place.name = business.name;
+        place.suburb = business.location.city;
+
+        return place;
+    }
 });
 
