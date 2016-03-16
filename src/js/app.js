@@ -23,7 +23,7 @@ $(function() {
             var filtered = [];
             var uniqueSuburbs = new Set();
             self.places().forEach(function(place) {
-                if (self.suburbFilter() == '' || place.suburb == self.suburbFilter()) {
+                if (self.suburbFilter() === '' || place.suburb == self.suburbFilter()) {
                     filtered.push(place);
                 }
             });
@@ -116,7 +116,7 @@ $(function() {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
             console.log(results);
             for (var i = 0; i < results.length; i++) {
-                var place = googlePlaceToPlace(results[i])
+                var place = googlePlaceToPlace(results[i]);
                 createMarker(place);
                 createInfoWindow(place);
                 viewModel.places.push(place);
@@ -218,7 +218,7 @@ $(function() {
     );
 
     // Send the API reqest
-    var request = $.ajax({
+    request = $.ajax({
         url: yelp_url,
         data: parameters,
         cache: true,                // This is crucial to include as well to prevent jQuery from adding on a cache-buster parameter "_=23489489749837", invalidating our oauth-signature
@@ -256,3 +256,9 @@ $(function() {
     }
 });
 
+$(window).resize(function () {
+    var h = $(window).height(),
+        offsetTop = 60; // Calculate the top offset
+
+    $('#map').css('height', (h - offsetTop));
+}).resize();

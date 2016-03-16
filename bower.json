@@ -1,0 +1,18 @@
+{
+  "name": "neighborhood_map",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Alistair McKelvie <alistair.mckelvie@gmail.com>"
+  ],
+  "license": "ISC",
+  "moduleType": [],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

@@ -4,6 +4,7 @@
   <title>Neighborhood Map</Title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8">
+  <link href="css/bootstrap.min.css">
   <link href="css/style.css" rel=stylesheet>
   <link href="css/map-icons.css" rel=stylesheet>
 </head>
@@ -14,11 +15,9 @@
       <div data-bind="text: $data, click: $parent.setSuburbFilter"></div>
     </div>
   </div>
-  <div>
-    <ul data-bind="foreach: filteredPlaces">
-      <li data-bind="text: name"></li>
-    </ul>
-  </div>
+  <ul id="places" data-bind="foreach: filteredPlaces">
+    <li data-bind="text: name"></li>
+  </ul>
   <div id="map"></div>
   <script src="js/knockout-3.4.0.js"></script>
   <script src="js/jquery-2.2.1.min.js"></script>

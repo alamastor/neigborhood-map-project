@@ -1,10 +1,21 @@
-html, body {
+html, body, .row {
   height: 100%;
-  margin: 0;
-  padding 0;
 }
 
 #map {
+  height: 100%;
+  width: 50%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom:0;
+  overflow:hidden;
+}
+
+#places {
+  width: 25%;
+  list-style-type: none;
+  overflow: scroll;
   height: 100%;
 }
 
