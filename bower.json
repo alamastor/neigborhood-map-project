@@ -14,5 +14,11 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "devDependencies": {
+    "knockout": "^3.4.0",
+    "jquery": "^2.2.1",
+    "map-icons": "^3.0.0",
+    "bootstrap": "^3.3.6"
+  }
 }

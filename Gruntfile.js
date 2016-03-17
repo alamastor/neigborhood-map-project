@@ -15,7 +15,7 @@ module.exports = function(grunt) {
                 files: [{
                     expand: true,
                     cwd: 'src',
-                    src: ['*', 'js/*.js', 'css/*.css'],
+                    src: ['**'],
                     dest: 'dist',
                 },
                 {
@@ -23,6 +23,42 @@ module.exports = function(grunt) {
                     cwd: 'bower_components/jquery/dist',
                     src: 'jquery.min.js',
                     dest: 'dist/js/lib',
+                },
+                {
+                    expand: true,
+                    cwd: 'bower_components/knockout/dist',
+                    src: 'knockout.js',
+                    dest: 'dist/js/lib',
+                },
+                {
+                    expand: true,
+                    cwd: 'bower_components/map-icons/dist/js',
+                    src: 'map-icons.js',
+                    dest: 'dist/js/lib',
+                },
+                {
+                    expand: true,
+                    cwd: 'bower_components/map-icons/dist/fonts',
+                    src: '**',
+                    dest: 'dist/fonts',
+                },
+                {
+                    expand: true,
+                    cwd: 'bower_components/map-icons/dist/css',
+                    src: 'map-icons.min.css',
+                    dest: 'dist/css/lib',
+                },
+                {
+                    expand: true,
+                    cwd: 'bower_components/bootstrap/dist/js',
+                    src: 'bootstrap.min.js',
+                    dest: 'dist/js/lib',
+                },
+                {
+                    expand: true,
+                    cwd: 'bower_components/bootstrap/dist/css',
+                    src: 'bootstrap.min.js',
+                    dest: 'dist/css/lib',
                 }]
             }
         },
