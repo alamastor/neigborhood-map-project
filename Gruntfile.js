@@ -32,33 +32,15 @@ module.exports = function(grunt) {
                 },
                 {
                     expand: true,
-                    cwd: 'bower_components/map-icons/dist/js',
-                    src: 'map-icons.js',
-                    dest: 'dist/js/lib',
+                    cwd: 'bower_components/map-icons/dist',
+                    src: ['js/map-icons.min.js', 'css/map-icons.min.css', 'fonts/*'],
+                    dest: 'dist/lib',
                 },
                 {
                     expand: true,
-                    cwd: 'bower_components/map-icons/dist/fonts',
-                    src: '**',
-                    dest: 'dist/fonts',
-                },
-                {
-                    expand: true,
-                    cwd: 'bower_components/map-icons/dist/css',
-                    src: 'map-icons.min.css',
-                    dest: 'dist/css/lib',
-                },
-                {
-                    expand: true,
-                    cwd: 'bower_components/bootstrap/dist/js',
-                    src: 'bootstrap.min.js',
-                    dest: 'dist/js/lib',
-                },
-                {
-                    expand: true,
-                    cwd: 'bower_components/bootstrap/dist/css',
-                    src: 'bootstrap.min.js',
-                    dest: 'dist/css/lib',
+                    cwd: 'bower_components/bootstrap/dist',
+                    src: ['js/bootstrap.min.js', 'css/bootstrap.min.css', 'fonts/*'],
+                    dest: 'dist/lib',
                 }]
             }
         },
