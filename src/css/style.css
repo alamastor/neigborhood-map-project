@@ -1,14 +1,17 @@
-html, body, .row {
+html, body {
   height: 100%;
 }
 
+#header-nav {
+  margin-bottom: 0;
+}
+
 #map {
-  height: 100%;
-  width: 50%;
+  height: calc(100% - 50px);
+  width: 75%;
   position: absolute;
   right: 0;
-  top: 0;
-  bottom:0;
+  top: 52px;
   overflow:hidden;
 }
 
@@ -16,7 +19,8 @@ html, body, .row {
   width: 25%;
   list-style-type: none;
   overflow: scroll;
-  height: 100%;
+  height: calc(100% - 52px);
+  margin: 0;
 }
 
 .dropdown {
