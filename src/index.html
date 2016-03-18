@@ -16,23 +16,29 @@
           <input type="text" class="form-control" placeholder="Search">
         </div>
         <button type="submit" class="btn btn-default">Submit</button>
+        <div class="dropdown">
+          <button class="btn btn-default dropdown-toggle" type="button"
+            data-toggle="dropdown" aria-haspopup="true">
+            Select Suburb
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li data-bind="click: setSuburbFilter('')"><b>All Suburbs</b></li>
+            <!-- ko foreach:  uniqueSuburbs -->
+              <li data-bind="text: $data, click: $parent.setSuburbFilter"></li>
+            <!-- /ko -->
+          </ul>
+        </div>
       </form>
     </div>
   </nav>
-  <!--
-  <div class="dropdown">
-    Mouse Over
-    <div class="dropdown-content" data-bind="foreach: uniqueSuburbs">
-      <div data-bind="text: $data, click: $parent.setSuburbFilter"></div>
-    </div>
-  </div>
-  -->
   <ul id="places" data-bind="foreach: filteredPlaces">
-    <li data-bind="text: name"></li>
+    <li data-bind="text: $parent.longName($data)"></li>
   </ul>
   <div id="map"></div>
-  <script src="js/lib/knockout.js"></script>
   <script src="js/lib/jquery.min.js"></script>
+  <script src="lib/js/bootstrap.min.js"></script>
+  <script src="js/lib/knockout.js"></script>
   <script src="js/tokens.js"></script>
   <script src="js/oauth-signature.js"></script>
   <script src="js/app.js"></script>

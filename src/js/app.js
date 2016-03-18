@@ -13,6 +13,13 @@ $(function() {
         var self = this;
         self.places = ko.observableArray();
 
+        self.longName = function(place) {
+            if (place.suburb) {
+                return place.name + ', ' + place.suburb;
+            }
+            return place.name;
+        };
+
         // Set suburbFilter to display only result from that suburb
         self.suburbFilter = ko.observable('');
         self.setSuburbFilter = function(data, event) {
@@ -134,6 +141,7 @@ $(function() {
             lng: googlePlace.geometry.location.lng()
         };
         place.name = googlePlace.name;
+        place.api = 'google';
         place.suburb = googlePlace.vicinity.split(',')[1].trim();
         return place;
     }
@@ -172,6 +180,7 @@ $(function() {
             lng: venue.location.lng
         };
         place.name = venue.name;
+        place.api = '4square';
         if (venue.location.hasOwnProperty('city')) {
             place.suburb = venue.location.city.split(',')[0].trim();
         }
