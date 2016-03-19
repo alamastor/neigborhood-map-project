@@ -1,5 +1,6 @@
 $(function() {
     'use strict';
+
     // Create a map object and specify the DOM element for display.
     var map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: -37.8647, lng: 144.9696},
@@ -20,6 +21,9 @@ $(function() {
             return place.name;
         };
 
+        // Search text for filtering places
+        self.searchTextFilter = ko.observable('');
+
         // Set suburbFilter to display only result from that suburb
         self.suburbFilter = ko.observable('');
         self.setSuburbFilter = function(data, event) {
@@ -28,14 +32,27 @@ $(function() {
 
         self.filteredPlaces = ko.computed(function() {
             var filtered = [];
-            var uniqueSuburbs = new Set();
+            // need to call dependancy in inner function here to make it register as a dependancy
+            self.searchTextFilter();
             self.places().forEach(function(place) {
-                if (self.suburbFilter() === '' || place.suburb == self.suburbFilter()) {
+                var suburbOK = self.suburbFilter() === '' || place.suburb == self.suburbFilter();
+                var strLen = self.searchTextFilter().length;
+                var searchTextOK = self.longName(place).slice(0, strLen).toLowerCase() == self.searchTextFilter().toLowerCase();
+                if (suburbOK && searchTextOK) {
                     filtered.push(place);
                 }
             });
             return filtered;
         });
+
+        self.searchTextFilter.subscribe(function(searchTextFilter) {
+            if ((0 < self.filteredPlaces().length) && (self.filteredPlaces().length < 10)) {
+                $('.autocomp-menu').show();
+            } else {
+                $('.autocomp-menu').hide();
+            }
+        });
+
         // Hide markers which aren't in selected suburb
         self.suburbFilter.subscribe(function(suburbFilter) {
             self.places().forEach(function(place) {
@@ -67,6 +84,22 @@ $(function() {
             });
         };
 
+        self.autoCompSelect = function(item) {
+            self.searchTextFilter(self.longName(item));
+            $('.autocomp-menu').hide();
+        };
+
+        self.inputKeyPress = function(data, event) {
+            if (event.keyCode == 40 || event.keycode == 38) {
+                var autoCompItems = $('.autocomp-menu').children();
+                console.log(event);
+            }
+            return true;
+        };
+
+        self.searchSubmit = function() {
+            console.log(self.searchTextFilter());
+        };
     }
     var viewModel = new ViewModel();
     ko.applyBindings(viewModel);

@@ -24,17 +24,10 @@ html, body {
 }
 
 .dropdown {
-  position: relative;
   display: inline-block;
 }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #fff;
-  z-index: 1;
+.autocomp-item:hover {
+  background: grey;
 }
 
-.dropdown:hover .dropdown-content {
-  display: block;
-}
