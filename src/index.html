@@ -16,8 +16,9 @@
             <input type="text" class="form-control" id="search-input"
               placeholder="Search"
               data-bind="textInput: searchTextFilter, event: {keydown: inputKeyPress}">
-            <ul class="dropdown-menu autocomp-menu" data-bind="foreach: filteredPlaces">
-              <li class="autocomp-item" data-bind="text: $parent.longName($data), click: $parent.autoCompSelect"></li>
+            <ul class="dropdown-menu autocomp-menu" data-bind="visible: showAutoCompMenu(), foreach: filteredPlaces">
+              <li class="autocomp-item"
+                  data-bind="text: $parent.longName($data), css: {highlight: $data==$parent.autoCompHighlightItem()}, click: $parent.autoCompSelect, event: {mouseover: $parent.setAutoCompHighlight}"></li>
             </ul>
         </div>
         <button type="submit" class="btn btn-default">Submit</button>

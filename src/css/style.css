@@ -27,7 +27,11 @@ html, body {
   display: inline-block;
 }
 
-.autocomp-item:hover {
+.autocomp-menu {
+  display: block;
+}
+
+.autocomp-item.highlight {
   background: grey;
 }
 

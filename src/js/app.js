@@ -45,11 +45,13 @@ $(function() {
             return filtered;
         });
 
+        self.showAutoCompMenu = ko.observable(false);
         self.searchTextFilter.subscribe(function(searchTextFilter) {
+            self.autoCompHighlightItem(null);
             if ((0 < self.filteredPlaces().length) && (self.filteredPlaces().length < 10)) {
-                $('.autocomp-menu').show();
+                self.showAutoCompMenu(true);
             } else {
-                $('.autocomp-menu').hide();
+                self.showAutoCompMenu(false);
             }
         });
 
@@ -86,19 +88,56 @@ $(function() {
 
         self.autoCompSelect = function(item) {
             self.searchTextFilter(self.longName(item));
-            $('.autocomp-menu').hide();
+            self.showAutoCompMenu(false);
         };
 
         self.inputKeyPress = function(data, event) {
-            if (event.keyCode == 40 || event.keycode == 38) {
-                var autoCompItems = $('.autocomp-menu').children();
-                console.log(event);
+            // Only care about up / down arrow, return now otherwise
+            if (event.keyCode != 38 && event.keyCode != 40) {
+                return true;
             }
+
+            // If the menu is not currently visible then just return function
+            if (!self.showAutoCompMenu()) {
+                return true;
+            }
+
+            var itemIndex;
+            if (self.autoCompHighlightItem()) {
+                itemIndex = self.filteredPlaces().indexOf(self.autoCompHighlightItem());
+            } else {
+                itemIndex = -1;
+            }
+
+            if (event.keyCode == 38) {
+                itemIndex--;
+            } else if (event.keyCode == 40) {
+                itemIndex++;
+            }
+
+            // This allows wrapping from top of list from bottom to top,
+            // ideally would just use mod but js does not
+            // have proper mod. This also handles the case where allows
+            // handling of the case where there was no previous
+            // highlighted item, as in that case the index will now be -2.
+            if (itemIndex < 0) {
+                itemIndex = self.filteredPlaces().length - 1;
+            } else if (itemIndex >= self.filteredPlaces().length) {
+                itemIndex = 0;
+            }
+
+            self.autoCompHighlightItem(self.filteredPlaces()[itemIndex]);
             return true;
         };
 
+        self.autoCompHighlightItem = ko.observable();
+        self.setAutoCompHighlight = function(data, event) {
+            console.log(data);
+            self.autoCompHighlightItem(data);
+        };
+
         self.searchSubmit = function() {
-            console.log(self.searchTextFilter());
+            self.autoCompSelect(self.autoCompHighlightItem());
         };
     }
     var viewModel = new ViewModel();
