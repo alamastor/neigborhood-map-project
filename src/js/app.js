@@ -127,12 +127,27 @@ $(function() {
         };
 
         // Up / down arrow key handling for navigating autocomplete menu
+        // And enter handling for submit
         self.inputKeyPress = function(data, event) {
-            // Only care about up / down arrow, return now otherwise
-            if (event.keyCode != 38 && event.keyCode != 40) {
-                return true;
+            switch (event.keyCode) {
+                case 13:
+                    // enter
+                    self.searchSubmit();
+                    break;
+                case 38:
+                    // up
+                    self.moveAutoCompHighlight('up')
+                    break;
+                case 40:
+                    // down
+                    self.moveAutoCompHighlight('down')
+                    break;
+                default:
+                    return true
             }
+        };
 
+        self.moveAutoCompHighlight = function(dir) {
             // If the menu is not currently visible then just return function
             if (!self.showAutoCompMenu()) {
                 return true;
@@ -145,10 +160,12 @@ $(function() {
                 itemIndex = -1;
             }
 
-            if (event.keyCode == 38) {
+            if (dir == 'up') {
                 itemIndex--;
-            } else if (event.keyCode == 40) {
+            } else if (dir == 'down') {
                 itemIndex++;
+            } else {
+                console.log('!! got unexpected input to moveAutoCompHighlight');
             }
 
             // This allows wrapping from top of list from bottom to top,
@@ -165,9 +182,6 @@ $(function() {
             self.autoCompHighlightItem(self.filteredPlaces()[itemIndex]);
             return true;
         };
-
-
-
 
         /*
          * Misc
