@@ -88,6 +88,11 @@ $(function() {
             self.placeSelected(self.filteredPlaces[0]);
         };
 
+        // Clear search text, called by view
+        self.clearSearch = function() {
+            self.searchTextFilter('');
+        };
+
 
         /*
          * Search form autocomplete section
