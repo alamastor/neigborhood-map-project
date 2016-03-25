@@ -12,7 +12,7 @@
   <nav class="navbar navbar-default" id="header-nav">
     <div class="collapse navbar-collapse">
       <form class="navbar-form navbar-right" role="search" autocomplete="off" data-bind="submit: searchSubmit">
-        <button data-bind="click: clearSearch">✖</button>
+        <button data-bind="click: clearSearch, visible: searchTextFilter">✖</button>
         <div class="form-group dropdown">
             <input type="text" class="form-control" id="search-input"
               placeholder="Search"
