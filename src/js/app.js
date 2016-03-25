@@ -12,27 +12,47 @@ $(function() {
 
     function ViewModel() {
         var self = this;
-        self.places = ko.observableArray();
 
-        self.longName = function(place) {
-            if (place.suburb) {
-                return place.name + ', ' + place.suburb;
-            }
-            return place.name;
-        };
+        // Array of all places found by ajax requests.
+        // It is deferred, as it's a dependency of the whole app,
+        // and it will be repeatedly pushed to when ajax requests return
+        self.places = ko.observableArray().extend({deferred: true});
 
-        // Search text for filtering places
+        // Subscribe to the places array to keep it sorted
+        self.places.subscribe(function(places) {
+            places.sort(function(a, b) {
+                if (a.name < b.name) {
+                    return -1;
+                }
+                if (a.name > b.name) {
+                    return 1;
+                }
+                return 0;
+            });
+        });
+
+
+        /**
+         * Places filtering section
+         */
+
+        // This observable is set by, and can set the search box text.
+        // It is used to generate the filteredPlaces array
         self.searchTextFilter = ko.observable('');
 
-        // Set suburbFilter to display only result from that suburb
+        // This observable is used to generate the filteredPlaces array
         self.suburbFilter = ko.observable('');
+
+        // Function used by the view to set the suburb filter
         self.setSuburbFilter = function(data, event) {
             self.suburbFilter(data);
         };
 
+        // Computed array of filtered places, for use in side bar and autocomplete.
+        // This depends on two filters; suburbFilter and searchTextFilter
         self.filteredPlaces = ko.computed(function() {
             var filtered = [];
-            // need to call dependancy in inner function here to make it register as a dependancy
+            // need to call dependancy here to make it register as a dependancy, as it's used by inner function
             self.searchTextFilter();
             self.places().forEach(function(place) {
                 var suburbOK = self.suburbFilter() === '' || place.suburb == self.suburbFilter();
@@ -45,6 +65,35 @@ $(function() {
             return filtered;
         });
 
+        self.placeSelected = function(place) {
+            // TODO: Do things with selected places here
+            console.log('TODO: Search complete stuff');
+            console.log(place);
+        };
+
+        /*
+         * Search form section
+         */
+        self.searchSubmit = function() {
+            if (self.autoCompHighlightItem()) {
+                // On submit, if an autocomplte item is highlighted, then use it
+                self.autoCompSelect(self.autoCompHighlightItem());
+            } else if (self.filteredPlaces().length == 1) {
+                // If there's only one place in the filter list, then accept it
+                self.autoCompSelect(self.filteredPlaces()[0]);
+            } else {
+                // Not done selecting, do nothing
+                return;
+            }
+            self.placeSelected(self.filteredPlaces[0]);
+        };
+
+
+        /*
+         * Search form autocomplete section
+         */
+
+        // Boolean observable, sets whether autocomplete menu is visible
         self.showAutoCompMenu = ko.observable(false);
         self.searchTextFilter.subscribe(function(searchTextFilter) {
             self.autoCompHighlightItem(null);
@@ -55,42 +104,24 @@ $(function() {
             }
         });
 
-        // Hide markers which aren't in selected suburb
-        self.suburbFilter.subscribe(function(suburbFilter) {
-            self.places().forEach(function(place) {
-                if (place.suburb == suburbFilter) {
-                    place.marker.setMap(map);
-                } else {
-                    place.marker.setMap(null);
-                }
-            });
-        });
-
-        self.uniqueSuburbs = ko.computed(function() {
-            var suburbSet = new Set();
-            self.places().forEach(function(place) {
-                suburbSet.add(place.suburb);
-            });
-            return Array.from(suburbSet).sort();
-        });
-
-        self.sortPlaces = function () {
-            self.places.sort(function(a, b) {
-                if (a.name < b.name) {
-                    return -1;
-                }
-                if (a.name > b.name) {
-                    return 1;
-                }
-                return 0;
-            });
-        };
-
-        self.autoCompSelect = function(item) {
-            self.searchTextFilter(self.longName(item));
+        // Call to accept the autocomple option, and set filtering based on it
+        self.autoCompSelect = function(place) {
+            self.searchTextFilter(self.longName(place));
             self.showAutoCompMenu(false);
         };
 
+        // Observable which represents the place which is
+        // currently highlighted in the autocomplete menu
+        self.autoCompHighlightItem = ko.observable();
+
+        // function for setting the autoCompleteHighlightItem,
+        // used by the view
+        self.setAutoCompHighlight = function(data, event) {
+            console.log(data);
+            self.autoCompHighlightItem(data);
+        };
+
+        // Up / down arrow key handling for navigating autocomplete menu
         self.inputKeyPress = function(data, event) {
             // Only care about up / down arrow, return now otherwise
             if (event.keyCode != 38 && event.keyCode != 40) {
@@ -130,14 +161,38 @@ $(function() {
             return true;
         };
 
-        self.autoCompHighlightItem = ko.observable();
-        self.setAutoCompHighlight = function(data, event) {
-            console.log(data);
-            self.autoCompHighlightItem(data);
-        };
 
-        self.searchSubmit = function() {
-            self.autoCompSelect(self.autoCompHighlightItem());
+
+
+        /*
+         * Misc
+         */
+
+        // Hide markers which aren't in selected suburb
+        self.suburbFilter.subscribe(function(suburbFilter) {
+            self.places().forEach(function(place) {
+                if (place.suburb == suburbFilter) {
+                    place.marker.setMap(map);
+                } else {
+                    place.marker.setMap(null);
+                }
+            });
+        });
+
+        // Populates the suburb selector dropdown
+        self.uniqueSuburbs = ko.computed(function() {
+            var suburbSet = new Set();
+            self.places().forEach(function(place) {
+                suburbSet.add(place.suburb);
+            });
+            return Array.from(suburbSet).sort();
+        });
+        // utility function for generating name + suburb for a place
+        self.longName = function(place) {
+            if (place.suburb) {
+                return place.name + ', ' + place.suburb;
+            }
+            return place.name;
         };
     }
     var viewModel = new ViewModel();
@@ -200,7 +255,6 @@ $(function() {
                 createInfoWindow(place);
                 viewModel.places.push(place);
             }
-            viewModel.sortPlaces();
         } else {
             // TODO: handle request fail
         }
@@ -237,7 +291,6 @@ $(function() {
             createInfoWindow(place);
             viewModel.places.push(place);
         });
-        viewModel.sortPlaces();
     });
     request.fail(function(jqXHR, textStatus) {
         console.log('failed');
@@ -313,7 +366,6 @@ $(function() {
             createInfoWindow(place);
             viewModel.places.push(place);
         });
-        viewModel.sortPlaces();
     });
     request.fail(function(jqXHR, textStatus) {
         console.log('failed');
