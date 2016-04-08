@@ -40,7 +40,7 @@
     </div>
   </nav>
   <ul id="places" data-bind="foreach: filteredPlaces">
-    <li data-bind="text: $parent.longName($data)"></li>
+    <li data-bind="text: $parent.longName($data), click: $parent.selectPlace"></li>
   </ul>
   <div id="map"></div>
   <script src="js/lib/jquery.min.js"></script>

@@ -187,6 +187,11 @@ $(function() {
          * Misc
          */
 
+        self.selectPlace = function(place) {
+            console.log(place);
+            place.infoWindow.open(map, place.marker);
+        };
+
         // Hide markers which aren't in selected suburb
         self.suburbFilter.subscribe(function(suburbFilter) {
             self.places().forEach(function(place) {
@@ -223,7 +228,7 @@ $(function() {
         // so it can be easily updated based on
         // the properties of the place
         place.marker = new Marker({
-            position: place.latLon,
+            position: place.latLng,
             map: map,
             icon: {
                 path: MAP_PIN,
@@ -241,9 +246,29 @@ $(function() {
     }
 
     function createInfoWindow(place) {
-        place.infoWindow = new google.maps.InfoWindow({
-                content: place.name,
-        });
+        var content = document.createElement('div');
+        $('<h3>' + place.name + '</h3>').appendTo(content);
+        if (place.hasOwnProperty('image')) {
+            $('<img src=' + place.image + '>').appendTo(content);
+        }
+        if (place.hasOwnProperty('url')) {
+            $('<a href=' + place.url + '>' + place.api + ' Link</a>').appendTo(content);
+        }
+
+        if (place.hasOwnProperty('open_now')) {
+            if (place.open_now) {
+                $('<p>Now Open!</p>').appendTo(content);
+            } else {
+                $('<p>Currently Closed</p>').appendTo(content);
+            }
+        }
+
+        if (place.hasOwnProperty('text')) {
+            $('<p>"' + place.text + '"</p>').appendTo(content);
+        }
+
+        place.infoWindow = new google.maps.InfoWindow();
+        place.infoWindow.setContent(content);
     }
 
     function closeAllInfoWindows() {
@@ -281,13 +306,23 @@ $(function() {
 
     function googlePlaceToPlace(googlePlace) {
         var place = {};
-        place.latLon = {
+        place.latLng = {
             lat: googlePlace.geometry.location.lat(),
             lng: googlePlace.geometry.location.lng()
         };
         place.name = googlePlace.name;
         place.api = 'google';
         place.suburb = googlePlace.vicinity.split(',')[1].trim();
+
+        if (googlePlace.hasOwnProperty('photos') && googlePlace.photos.length > 0) {
+            place.image = googlePlace.photos[0].getUrl({
+                maxWidth: 100,
+                maxHeight: 100,
+            })
+        }
+
+        place.open_now = googlePlace.open_now;
+
         return place;
     }
 
@@ -319,7 +354,7 @@ $(function() {
 
     function fourSqrVenueToPlace(venue) {
         var place = {};
-        place.latLon = {
+        place.latLng = {
             lat: venue.location.lat,
             lng: venue.location.lng
         };
@@ -327,6 +362,20 @@ $(function() {
         place.api = '4square';
         if (venue.location.hasOwnProperty('city')) {
             place.suburb = venue.location.city.split(',')[0].trim();
+        }
+
+        if (place.hasOwnProperty('contact') && place.contact.hasOwnProperty('formattedPhone')) {
+            place.phone = venue.contact.formattedPhone;
+        }
+
+        if (place.hasOwnProperty('url')) {
+            place.url = url;
+        }
+
+        if (venue.hereNow.summary == 'Nobody here') {
+            place.open_now = false;
+        } else {
+            place.open_now = true;
         }
 
         return place;
@@ -355,7 +404,7 @@ $(function() {
         oauth_nonce: nonce_generate(),
         oauth_timestamp: Math.floor(Date.now()/1000),
         oauth_signature_method: 'HMAC-SHA1',
-        oauth_version : '1.0',
+        oauth_version: '1.0',
         term: 'bicycle_store',
         cll: '-37.8647,144.9696',
         location: 'St Kilda',
@@ -397,15 +446,27 @@ $(function() {
 
     function yelpBusToPlace(business) {
         var place = {};
-        place.latLon = {
+        place.api = 'Yelp'
+        place.latLng = {
             lat: business.location.coordinate.latitude,
             lng: business.location.coordinate.longitude
         };
         place.name = business.name;
         place.suburb = business.location.city;
 
+        if (place.hasOwnProperty('image_url')) {
+            place.image = business.image_url;
+        }
+
+        if (business.hasOwnProperty('snippet_text')) {
+            place.text = business.snippet_text;
+        }
+        place.url = business.url;
+        place.phone = business.phone;
+
         return place;
     }
+
 });
 
 $(window).resize(function () {
