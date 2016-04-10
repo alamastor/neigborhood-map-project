@@ -136,14 +136,14 @@ $(function() {
                     break;
                 case 38:
                     // up
-                    self.moveAutoCompHighlight('up')
+                    self.moveAutoCompHighlight('up');
                     break;
                 case 40:
                     // down
-                    self.moveAutoCompHighlight('down')
+                    self.moveAutoCompHighlight('down');
                     break;
                 default:
-                    return true
+                    return true;
             }
         };
 
@@ -248,12 +248,20 @@ $(function() {
     function createInfoWindow(place) {
         var content = document.createElement('div');
         $('<h3>' + place.name + '</h3>').appendTo(content);
+        if (place.hasOwnProperty('description')) {
+            $('<h4>' + place.description + '</h4>').appendTo(content);
+        }
+        $('<h5>' + place.address + '</h5>').appendTo(content);
         if (place.hasOwnProperty('image')) {
             $('<img src=' + place.image + '>').appendTo(content);
         }
-        if (place.hasOwnProperty('url')) {
-            $('<a href=' + place.url + '>' + place.api + ' Link</a>').appendTo(content);
+        if (place.hasOwnProperty('fourSquareUrl')) {
+            $('<a href=' + place.fourSquareUrl + '>Four Square Link</a>').appendTo(content);
         }
+        if (place.hasOwnProperty('yelpUrl')) {
+            $('<a href=' + place.yelpUrl + '>Yelp Link</a>').appendTo(content);
+        }
+
 
         if (place.hasOwnProperty('open_now')) {
             if (place.open_now) {
@@ -313,15 +321,25 @@ $(function() {
         place.name = googlePlace.name;
         place.api = 'google';
         place.suburb = googlePlace.vicinity.split(',')[1].trim();
+        place.address = googlePlace.vicinity;
 
         if (googlePlace.hasOwnProperty('photos') && googlePlace.photos.length > 0) {
             place.image = googlePlace.photos[0].getUrl({
                 maxWidth: 100,
                 maxHeight: 100,
-            })
+            });
         }
 
-        place.open_now = googlePlace.open_now;
+        // TODO: capitalize this string with css
+        place.description = googlePlace.types[0].replace('_', ' ');
+
+        if (googlePlace.hasOwnProperty('opening_hours')) {
+            place.open_now = googlePlace.opening_hours.open_now;
+        }
+
+        if (googlePlace.hasOwnProperty('rating')) {
+            place.rating = googlePlace.rating;
+        }
 
         return place;
     }
@@ -340,10 +358,16 @@ $(function() {
     request.done(function(msg) {
         console.log(msg);
         msg.response.venues.forEach(function(venue) {
-            var place = fourSqrVenueToPlace(venue);
-            createMarker(place);
-            createInfoWindow(place);
-            viewModel.places.push(place);
+            // Don't keep results that don't include an address.
+            // Could determine this from coords, but all results
+            // without an address contain very little information,
+            // and are hard to use with other API results.
+            if (venue.location.hasOwnProperty('address')) {
+                var place = fourSqrVenueToPlace(venue);
+                createMarker(place);
+                createInfoWindow(place);
+                viewModel.places.push(place);
+            }
         });
     });
     request.fail(function(jqXHR, textStatus) {
@@ -359,24 +383,26 @@ $(function() {
             lng: venue.location.lng
         };
         place.name = venue.name;
-        place.api = '4square';
-        if (venue.location.hasOwnProperty('city')) {
-            place.suburb = venue.location.city.split(',')[0].trim();
-        }
+        place.api = 'Foursquare';
+        place.suburb = venue.location.city.split(',')[0].trim();
+        place.address = venue.location.address + ', ' + venue.location.city;
 
         if (place.hasOwnProperty('contact') && place.contact.hasOwnProperty('formattedPhone')) {
             place.phone = venue.contact.formattedPhone;
         }
 
-        if (place.hasOwnProperty('url')) {
-            place.url = url;
+        // create place description from catagories
+        if (venue.categories.length > 0) {
+            place.description = venue.categories[0].name;
+            if (venue.categories.length > 1) {
+                for (var i = 1; i > venue.categories.length - 1; i++) {
+                    place.description += ', ' + venue.categories[i];
+                }
+                place.description += ' and ' + venue.categories[venue.categories.length - 1];
+            }
         }
 
-        if (venue.hereNow.summary == 'Nobody here') {
-            place.open_now = false;
-        } else {
-            place.open_now = true;
-        }
+        place.fourSquareUrl = 'https://foursquare.com/v/' + venue.id + '?ref=' + fourSquareTokens.clientId;
 
         return place;
     }
@@ -441,18 +467,30 @@ $(function() {
         console.log(textStatus);
     });
     function cb(res) {
-        console.log('GOT CBb');
+        console.log('Got Cb');
     }
 
     function yelpBusToPlace(business) {
         var place = {};
-        place.api = 'Yelp'
+        place.api = 'Yelp';
         place.latLng = {
             lat: business.location.coordinate.latitude,
             lng: business.location.coordinate.longitude
         };
         place.name = business.name;
         place.suburb = business.location.city;
+        place.address = business.location.address + ', ' + business.location.city;
+
+        // create place description from catagories
+        if (business.categories.length > 0) {
+            place.description = business.categories[0][0];
+            if (business.categories.length > 1) {
+                for (var i = 1; i > business.categories.length - 1; i++) {
+                    place.description += ', ' + business.categories[i][0];
+                }
+                place.description += ' and ' + business.categories[business.categories.length - 1];
+            }
+        }
 
         if (place.hasOwnProperty('image_url')) {
             place.image = business.image_url;
@@ -461,12 +499,12 @@ $(function() {
         if (business.hasOwnProperty('snippet_text')) {
             place.text = business.snippet_text;
         }
-        place.url = business.url;
+
+        place.yelpUrl = business.url;
         place.phone = business.phone;
 
         return place;
     }
-
 });
 
 $(window).resize(function () {
