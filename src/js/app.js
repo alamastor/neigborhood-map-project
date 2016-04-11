@@ -246,12 +246,15 @@ $(function() {
     }
 
     function createInfoWindowContent(place) {
-        var content = document.createElement('div');
+        var content = $('<div class="info-window-content"></div>')[0];
         $('<h3>' + place.name + '</h3>').appendTo(content);
         if (place.hasOwnProperty('description')) {
             $('<h4>' + place.description + '</h4>').appendTo(content);
         }
         $('<h5>' + place.address + '</h5>').appendTo(content);
+        if (place.hasOwnProperty('phone')) {
+            $('<p>' + place.phone + '</p>').appendTo(content);
+        }
         if (place.hasOwnProperty('image')) {
             $('<img src=' + place.image + '>').appendTo(content);
         }
@@ -307,10 +310,6 @@ $(function() {
                 'yelpUrl',
                 'yelpSnippet',
             ];
-            console.log('----------------');
-            console.log(placesObject);
-            console.log(place);
-            console.log(existingPlace);
             propertiesToCheck.forEach(function(property) {
                 if (place.hasOwnProperty(property) && !existingPlace.hasOwnProperty(property)) {
                     existingPlace[property] = place[property];
