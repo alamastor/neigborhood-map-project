@@ -19,6 +19,8 @@
     "knockout": "^3.4.0",
     "jquery": "^2.2.1",
     "map-icons": "^3.0.0",
-    "bootstrap": "^3.3.6"
+    "bootstrap": "^3.3.6",
+    "requirejs": "^2.2.0",
+    "requirejs-plugins": "^1.0.3"
   }
 }

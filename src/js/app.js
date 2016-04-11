@@ -1,3 +1,5 @@
+requirejs(['jquery', 'google', 'knockout', 'oauthSignature', '../tokens', 'mapIcons'],
+function($, google, ko, oauthSignature, tokens, mapIcons) {
 $(function() {
     'use strict';
 
@@ -20,7 +22,7 @@ $(function() {
 
         // Subscribe to the places array to keep it sorted
         self.places.subscribe(function(places) {
-            places.sort(function(a, b) {
+            places.sort (function(a, b) {
                 if (a.name < b.name) {
                     return -1;
                 }
@@ -227,11 +229,11 @@ $(function() {
         // Make marker a property of place,
         // so it can be easily updated based on
         // the properties of the place
-        place.marker = new Marker({
+        place.marker = new mapIcons.Marker({
             position: place.latLng,
             map: map,
             icon: {
-                path: MAP_PIN,
+                path: mapIcons.MAP_PIN,
                 fillColor: '#00CCBB',
                 fillOpacity: 0.5,
                 strokeColor: '',
@@ -326,7 +328,7 @@ $(function() {
                 viewModel.places.push(placesObject[place]);
             }
         }
-    }
+    };
 
     // Google places
     var service = new google.maps.places.PlacesService(map);
@@ -383,8 +385,8 @@ $(function() {
     var request = $.ajax('https://api.foursquare.com/v2/venues/search', {
         dataType: 'json',
         data: {
-            client_id: fourSquareTokens.clientId,
-            client_secret: fourSquareTokens.clientSecret,
+            client_id: tokens.fourSquareTokens.clientId,
+            client_secret: tokens.fourSquareTokens.clientSecret,
             ll: '-37.8647,144.9696',
             query: 'bicycle',
             v: 20160310,
@@ -438,7 +440,7 @@ $(function() {
             }
         }
 
-        place.fourSquareUrl = 'https://foursquare.com/v/' + venue.id + '?ref=' + fourSquareTokens.clientId;
+        place.fourSquareUrl = 'https://foursquare.com/v/' + venue.id + '?ref=' + tokens.fourSquareTokens.clientId;
 
         return place;
     }
@@ -461,8 +463,8 @@ $(function() {
     var yelp_url = 'https://api.yelp.com/v2/search';
 
     var parameters = {
-        oauth_consumer_key: yelpTokens.consumerKey,
-        oauth_token: yelpTokens.token,
+        oauth_consumer_key: tokens.yelpTokens.consumerKey,
+        oauth_token: tokens.yelpTokens.token,
         oauth_nonce: nonce_generate(),
         oauth_timestamp: Math.floor(Date.now()/1000),
         oauth_signature_method: 'HMAC-SHA1',
@@ -477,8 +479,8 @@ $(function() {
         'GET',
         yelp_url,
         parameters,
-        yelpTokens.consumerSecret,
-        yelpTokens.tokenSecret
+        tokens.yelpTokens.consumerSecret,
+        tokens.yelpTokens.tokenSecret
     );
 
     // Send the API reqest
@@ -570,3 +572,4 @@ $(window).resize(function () {
 
     $('#map').css('height', (h - offsetTop));
 }).resize();
+});

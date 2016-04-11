@@ -23,6 +23,9 @@ module.exports = function(grunt) {
                     cwd: 'bower_components/jquery/dist',
                     src: 'jquery.min.js',
                     dest: 'dist/js/lib',
+                    rename: function(dest, src) {
+                        return dest + '/jquery.js';
+                    },
                 },
                 {
                     expand: true,
@@ -41,6 +44,18 @@ module.exports = function(grunt) {
                     cwd: 'bower_components/bootstrap/dist',
                     src: ['js/bootstrap.min.js', 'css/bootstrap.min.css', 'fonts/*'],
                     dest: 'dist/lib',
+                },
+                {
+                    expand: true,
+                    cwd: 'bower_components/requirejs',
+                    src: ['require.js'],
+                    dest: 'dist/js/lib',
+                },
+                {
+                    expand: true,
+                    cwd: 'bower_components/requirejs-plugins/src',
+                    src: ['async.js'],
+                    dest: 'dist/js/lib',
                 }]
             }
         },
