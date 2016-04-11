@@ -245,7 +245,7 @@ $(function() {
         });
     }
 
-    function createInfoWindow(place) {
+    function createInfoWindowContent(place) {
         var content = document.createElement('div');
         $('<h3>' + place.name + '</h3>').appendTo(content);
         if (place.hasOwnProperty('description')) {
@@ -275,8 +275,7 @@ $(function() {
             $('<p>"' + place.text + '"</p>').appendTo(content);
         }
 
-        place.infoWindow = new google.maps.InfoWindow();
-        place.infoWindow.setContent(content);
+        return content;
     }
 
     function closeAllInfoWindows() {
@@ -289,6 +288,46 @@ $(function() {
     /**
      * API requests
      */
+
+    // Store API results in object with address as key.
+    // This object will the be converted to array for Knockout, after cleanup.
+    var placesObject = {};
+    var addPlaceToPlacesObject = function(place) {
+        if (!placesObject.hasOwnProperty(place.address)) {
+            placesObject[place.address] = place;
+        } else {
+            // Place is already in object just add properties it doesn't already have
+            var existingPlace = placesObject[place.address];
+            var propertiesToCheck = [
+                'phone',
+                'image',
+                'description',
+                'open_now',
+                'fourSquareUrl',
+                'yelpUrl',
+                'yelpSnippet',
+            ];
+            console.log('----------------');
+            console.log(placesObject);
+            console.log(place);
+            console.log(existingPlace);
+            propertiesToCheck.forEach(function(property) {
+                if (place.hasOwnProperty(property) && !existingPlace.hasOwnProperty(property)) {
+                    existingPlace[property] = place[property];
+                }
+                existingPlace.infoWindow.setContent(createInfoWindowContent(existingPlace));
+                place.marker.setMap(null);
+            });
+        }
+    };
+    var updatePlacesArray = function() {
+        viewModel.places([]);
+        for (var place in placesObject) {
+            if (placesObject.hasOwnProperty(place)) {
+                viewModel.places.push(placesObject[place]);
+            }
+        }
+    }
 
     // Google places
     var service = new google.maps.places.PlacesService(map);
@@ -304,12 +343,14 @@ $(function() {
             for (var i = 0; i < results.length; i++) {
                 var place = googlePlaceToPlace(results[i]);
                 createMarker(place);
-                createInfoWindow(place);
-                viewModel.places.push(place);
+                place.infoWindow = new google.maps.InfoWindow();
+                place.infoWindow.setContent(createInfoWindowContent(place));
+                addPlaceToPlacesObject(place);
             }
         } else {
             // TODO: handle request fail
         }
+        updatePlacesArray();
     }
 
     function googlePlaceToPlace(googlePlace) {
@@ -319,9 +360,8 @@ $(function() {
             lng: googlePlace.geometry.location.lng()
         };
         place.name = googlePlace.name;
-        place.api = 'google';
-        place.suburb = googlePlace.vicinity.split(',')[1].trim();
-        place.address = googlePlace.vicinity;
+        place.suburb = fixSuburb(googlePlace.vicinity.split(',')[1].trim());
+        place.address = fixAddress(googlePlace.vicinity.split(',')[0].trim()) + ', ' + place.suburb;
 
         if (googlePlace.hasOwnProperty('photos') && googlePlace.photos.length > 0) {
             place.image = googlePlace.photos[0].getUrl({
@@ -335,10 +375,6 @@ $(function() {
 
         if (googlePlace.hasOwnProperty('opening_hours')) {
             place.open_now = googlePlace.opening_hours.open_now;
-        }
-
-        if (googlePlace.hasOwnProperty('rating')) {
-            place.rating = googlePlace.rating;
         }
 
         return place;
@@ -365,10 +401,12 @@ $(function() {
             if (venue.location.hasOwnProperty('address')) {
                 var place = fourSqrVenueToPlace(venue);
                 createMarker(place);
-                createInfoWindow(place);
-                viewModel.places.push(place);
+                place.infoWindow = new google.maps.InfoWindow();
+                place.infoWindow.setContent(createInfoWindowContent(place));
+                addPlaceToPlacesObject(place);
             }
         });
+        updatePlacesArray();
     });
     request.fail(function(jqXHR, textStatus) {
         console.log('failed');
@@ -383,9 +421,8 @@ $(function() {
             lng: venue.location.lng
         };
         place.name = venue.name;
-        place.api = 'Foursquare';
-        place.suburb = venue.location.city.split(',')[0].trim();
-        place.address = venue.location.address + ', ' + venue.location.city;
+        place.suburb = fixSuburb(venue.location.city.split(',')[0].trim());
+        place.address = fixAddress(venue.location.address) + ', ' + place.suburb;
 
         if (place.hasOwnProperty('contact') && place.contact.hasOwnProperty('formattedPhone')) {
             place.phone = venue.contact.formattedPhone;
@@ -457,9 +494,11 @@ $(function() {
         msg.businesses.forEach(function(business) {
             var place = yelpBusToPlace(business);
             createMarker(place);
-            createInfoWindow(place);
-            viewModel.places.push(place);
+            place.infoWindow = new google.maps.InfoWindow();
+            place.infoWindow.setContent(createInfoWindowContent(place));
+            addPlaceToPlacesObject(place);
         });
+        updatePlacesArray();
     });
     request.fail(function(jqXHR, textStatus) {
         console.log('failed');
@@ -472,14 +511,13 @@ $(function() {
 
     function yelpBusToPlace(business) {
         var place = {};
-        place.api = 'Yelp';
         place.latLng = {
             lat: business.location.coordinate.latitude,
             lng: business.location.coordinate.longitude
         };
         place.name = business.name;
-        place.suburb = business.location.city;
-        place.address = business.location.address + ', ' + business.location.city;
+        place.suburb = fixSuburb(business.location.city);
+        place.address = fixAddress(business.location.address[0]) + ', ' + place.suburb;
 
         // create place description from catagories
         if (business.categories.length > 0) {
@@ -497,13 +535,33 @@ $(function() {
         }
 
         if (business.hasOwnProperty('snippet_text')) {
-            place.text = business.snippet_text;
+            place.yelpSnippet = business.snippet_text;
         }
 
         place.yelpUrl = business.url;
         place.phone = business.phone;
 
         return place;
+    }
+
+    // Function to remove minor differences in addresses,
+    // which prevent results for the same place from different
+    // APIs from matching.
+    function fixAddress(address) {
+        console.log(address);
+        address = address.replace('.', '');
+        address = address.replace(/St$/, 'Street');
+        return address;
+    }
+
+    // Function to remove minor differences in suburb,
+    // which prevent results for the same place from different
+    // APIs from matching.
+    function fixSuburb(suburb) {
+        // Some fix abreviation of Saint Kilda
+        suburb = suburb.replace('.', '');
+        suburb = suburb.replace('St', 'Saint');
+        return suburb;
     }
 });
 
