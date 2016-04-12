@@ -12,8 +12,6 @@ $(function() {
     });
     // TODO: handle map fail
 
-
-
     function createMarker(place) {
         // Make marker a property of place,
         // so it can be easily updated based on
@@ -42,33 +40,31 @@ $(function() {
         if (place.hasOwnProperty('description')) {
             $('<h4>' + place.description + '</h4>').appendTo(content);
         }
-        $('<h5>' + place.address + '</h5>').appendTo(content);
+        var infoWindowBody = $('<div class="info-window-body"></div>').appendTo(content);
+        var infoWindowBodyText = $('<div class="info-window-body-text"></div>').appendTo(infoWindowBody);
+        $('<h5>' + place.address + '</h5>').appendTo(infoWindowBodyText);
         if (place.hasOwnProperty('phone')) {
-            $('<p>' + place.phone + '</p>').appendTo(content);
-        }
-        if (place.hasOwnProperty('image')) {
-            $('<img src=' + place.image + '>').appendTo(content);
+            $('<p>' + place.phone + '</p>').appendTo(infoWindowBodyText);
         }
         if (place.hasOwnProperty('fourSquareUrl')) {
-            $('<a href=' + place.fourSquareUrl + '>Four Square Link</a>').appendTo(content);
+            $('<p><a href=' + place.fourSquareUrl + '><img src="images/Connect-to-Foursquare-150.png"></a></p>').appendTo(infoWindowBodyText);
         }
         if (place.hasOwnProperty('yelpUrl')) {
-            $('<a href=' + place.yelpUrl + '>Yelp Link</a>').appendTo(content);
+            $('<p><a href=' + place.yelpUrl + '><img src="images/yelp_review_btn_dark.png"></a></p>').appendTo(infoWindowBodyText);
         }
-
-
         if (place.hasOwnProperty('open_now')) {
             if (place.open_now) {
-                $('<p>Now Open!</p>').appendTo(content);
+                $('<p>Now Open!</p>').appendTo(infoWindowBodyText);
             } else {
-                $('<p>Currently Closed</p>').appendTo(content);
+                $('<p>Currently Closed</p>').appendTo(infoWindowBodyText);
             }
         }
-
         if (place.hasOwnProperty('text')) {
-            $('<p>"' + place.text + '"</p>').appendTo(content);
+            $('<p>"' + place.text + '"</p>').appendTo(infoWindowBodyText);
         }
-
+        if (place.hasOwnProperty('image')) {
+            $('<img src=' + place.image + '>').appendTo(infoWindowBody);
+        }
         return content;
     }
 
@@ -87,11 +83,11 @@ $(function() {
     // This object will the be converted to array for Knockout, after cleanup.
     var placesObject = {};
     var addPlaceToPlacesObject = function(place) {
-        if (!placesObject.hasOwnProperty(place.address)) {
-            placesObject[place.address] = place;
+        if (!placesObject.hasOwnProperty(place.address.toLowerCase())) {
+            placesObject[place.address.toLowerCase()] = place;
         } else {
             // Place is already in object just add properties it doesn't already have
-            var existingPlace = placesObject[place.address];
+            var existingPlace = placesObject[place.address.toLowerCase()];
             var propertiesToCheck = [
                 'phone',
                 'image',
@@ -341,6 +337,7 @@ $(function() {
         console.log(address);
         address = address.replace('.', '');
         address = address.replace(/St$/, 'Street');
+        address = address.replace(/Rd$/, 'Road');
         return address;
     }
 

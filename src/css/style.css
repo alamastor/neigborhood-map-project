@@ -35,3 +35,6 @@ html, body {
   background: grey;
 }
 
+.info-window-body {
+  display: flex;
+}
