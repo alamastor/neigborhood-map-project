@@ -1,11 +1,19 @@
-requirejs(['jquery', 'google', 'oauthSignature', '../tokens', 'mapIcons', '../view-model'],
+define(['jquery', 'google', 'oauthSignature', './tokens', 'mapIcons', './view-model'],
 function($, google, oauthSignature, tokens, mapIcons, viewModel) {
-$(function() {
-    'use strict';
+'use strict';
+var DEFAULT_MAP_CENTER = {lat: -37.8647, lng: 144.9696};
+// Return this object from module, everything declared below as function will be hoisted above this
+return {
+    init: init,
+    updateLocation: updateLocation,
+};
+
+function init() {
 
     // Create a map object and specify the DOM element for display.
+    var mapCenter = JSON.parse(localStorage.neigborhoodMapCenter) || DEFAULT_MAP_CENTER
     var map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: -37.8647, lng: 144.9696},
+        center: mapCenter,
         scrollwheel: true,
         zoom: 14,
         mapTypeId: google.maps.MapTypeId.TERRAIN,
@@ -118,7 +126,7 @@ $(function() {
     // Google places
     var service = new google.maps.places.PlacesService(map);
     service.nearbySearch({
-        location: new google.maps.LatLng(-37.867556, 144.980302),
+        location: new google.maps.LatLng(mapCenter.lat, mapCenter.lng),
         radius: 3000,
         type: 'bicycle_store',
     }, gotPlaces);
@@ -172,7 +180,7 @@ $(function() {
         data: {
             client_id: tokens.fourSquareTokens.clientId,
             client_secret: tokens.fourSquareTokens.clientSecret,
-            ll: '-37.8647,144.9696',
+            ll: mapCenterlat.toString() + ',' + mapCenter.lng.toString(),
             query: 'bicycle',
             v: 20160310,
         },
@@ -255,7 +263,7 @@ $(function() {
         oauth_signature_method: 'HMAC-SHA1',
         oauth_version: '1.0',
         term: 'bicycle_store',
-        cll: '-37.8647,144.9696',
+        cll: mapCenterlat.toString() + ',' + mapCenter.lng.toString(),
         location: 'St Kilda',
         callback: 'cb'              // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
     };
@@ -334,7 +342,6 @@ $(function() {
     // which prevent results for the same place from different
     // APIs from matching.
     function fixAddress(address) {
-        console.log(address);
         address = address.replace('.', '');
         address = address.replace(/St$/, 'Street');
         address = address.replace(/Rd$/, 'Road');
@@ -350,12 +357,34 @@ $(function() {
         suburb = suburb.replace('St', 'Saint');
         return suburb;
     }
-});
 
-$(window).resize(function () {
-    var h = $(window).height(),
-        offsetTop = 60; // Calculate the top offset
+    $(window).resize(function () {
+        var h = $(window).height(),
+            offsetTop = 60; // Calculate the top offset
 
-    $('#map').css('height', (h - offsetTop));
-}).resize();
+        $('#map').css('height', (h - offsetTop));
+    }).resize();
+}
+
+function updateLocation(locationName) {
+    var geocoder = new google.maps.Geocoder();
+    geocoder.geocode({
+        address: locationName,
+    }, function(results, status) {
+        console.log(results);
+        console.log(status);
+        if (status == 'OK') {
+            var lat = results[0].geometry.location.lat();
+            var lng = results[0].geometry.location.lng();
+            localStorage.setItem('neigborhoodMapCenter', JSON.stringify({
+                lat: lat,
+                lng: lng,
+            }));
+            viewModel.locationInput = results.formatted_address;
+        } else {
+            // TODO: handle fail
+        }
+    });
+}
+
 });

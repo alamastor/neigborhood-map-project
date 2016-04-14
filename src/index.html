@@ -11,33 +11,48 @@
 <body>
   <nav class="navbar navbar-default" id="header-nav">
     <div class="collapse navbar-collapse">
-      <form class="navbar-form navbar-right" role="search" autocomplete="off" data-bind="submit: searchSubmit">
-        <button data-bind="click: clearSearch, visible: searchTextFilter">✖</button>
-        <div class="form-group dropdown">
-            <input type="text" class="form-control" id="search-input"
-              placeholder="Search"
-              data-bind="textInput: searchTextFilter, event: {keydown: inputKeyPress}">
-            <ul class="dropdown-menu autocomp-menu" data-bind="visible: showAutoCompMenu(), foreach: filteredPlaces">
-              <li class="autocomp-item"
-                  data-bind="text: $parent.longName($data), css: {highlight: $data==$parent.autoCompHighlightItem()}, click: $parent.autoCompSelect, event: {mouseover: $parent.setAutoCompHighlight}"></li>
+      <ul class="nav navbar-nav">
+        <li>
+          <form class="navbar-form navbar-left" role="search" autocomplete="off" data-bind="submit: searchSubmit">
+            <button data-bind="click: clearSearch, visible: searchTextFilter">✖</button>
+            <div class="form-group dropdown">
+                <input type="text" class="form-control" id="search-input"
+                  placeholder="Search"
+                  data-bind="textInput: searchTextFilter, event: {keydown: inputKeyPress}">
+                <ul class="dropdown-menu autocomp-menu" data-bind="visible: showAutoCompMenu(), foreach: filteredPlaces">
+                  <li class="autocomp-item"
+                      data-bind="text: $parent.longName($data), css: {highlight: $data==$parent.autoCompHighlightItem()}, click: $parent.autoCompSelect, event: {mouseover: $parent.setAutoCompHighlight}"></li>
+                </ul>
+            </div>
+            <button type="submit" class="btn btn-default">Submit</button>
+          </form>
+        </li>
+        <li>
+          <div class="dropdown">
+            <button class="btn btn-default navbar-btn dropdown-toggle" type="button"
+              data-toggle="dropdown" aria-haspopup="true">
+              Select Suburb
+              <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu">
+              <li data-bind="click: setSuburbFilter('')"><b>All Suburbs</b></li>
+              <!-- ko foreach:  uniqueSuburbs -->
+                <li data-bind="text: $data, click: $parent.setSuburbFilter"></li>
+              <!-- /ko -->
             </ul>
+          </div>
+        </li>
+      </ul> <!--nav navbar-nav-->
+      <form class="navbar-form navbar-right" role="search" autocomplete="off" data-bind="submit: locationSubmit">
+        <button data-bind="click: clearSearch, visible: searchTextFilter">✖</button>
+        <div class="form-group">
+            <input type="text" class="form-control" id="location-input"
+              placeholder="Your Location"
+              data-bind="textInput: locationInput, event: {keydown: inputKeyPress}">
         </div>
         <button type="submit" class="btn btn-default">Submit</button>
       </form>
-      <div class="dropdown">
-        <button class="btn btn-default navbar-btn dropdown-toggle" type="button"
-          data-toggle="dropdown" aria-haspopup="true">
-          Select Suburb
-          <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-          <li data-bind="click: setSuburbFilter('')"><b>All Suburbs</b></li>
-          <!-- ko foreach:  uniqueSuburbs -->
-            <li data-bind="text: $data, click: $parent.setSuburbFilter"></li>
-          <!-- /ko -->
-        </ul>
-      </div>
-    </div>
+    </div> <!--collapse navbar-collapse-->
   </nav>
   <ul id="places" data-bind="foreach: filteredPlaces">
     <li data-bind="text: $parent.longName($data), click: $parent.selectPlace"></li>

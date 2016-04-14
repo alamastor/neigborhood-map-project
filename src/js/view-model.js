@@ -1,4 +1,4 @@
-define(['knockout'], function(ko) {
+define(['knockout', 'require'], function(ko, require) {
     function ViewModel() {
         var self = this;
 
@@ -61,6 +61,15 @@ define(['knockout'], function(ko) {
         };
 
         /*
+         * Location change section
+         */
+        self.locationInput = ko.observable('');
+        self.locationSubmit = function() {
+            var app = require('./app');
+            app.updateLocation(self.locationInput());
+        }
+
+        /*
          * Search form section
          */
         self.searchSubmit = function() {
@@ -81,7 +90,6 @@ define(['knockout'], function(ko) {
         self.clearSearch = function() {
             self.searchTextFilter('');
         };
-
 
         /*
          * Search form autocomplete section

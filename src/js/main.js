@@ -1,10 +1,5 @@
 requirejs.config({
     baseUrl: 'js/lib',
-    paths: {
-        //;tokens: '../tokens',
-        //map_icons: '../../lib/js/map.icons.min',
-        async: 'async'
-    },
     shim: {
         '../../lib/js/map-icons.min': {
             deps: ['google'],
@@ -28,4 +23,7 @@ define('mapIcons', ['../../lib/js/map-icons.min'], function() {
     }
 })
 
-requirejs(['../app']);
+requirejs(['jquery', '../app'],
+function(         $,     app) {
+    $(app.init());
+});
