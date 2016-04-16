@@ -1,132 +1,202 @@
 define(['jquery', 'google', 'oauthSignature', './tokens', 'mapIcons', './view-model'],
 function($, google, oauthSignature, tokens, mapIcons, viewModel) {
 'use strict';
-var DEFAULT_MAP_CENTER = {lat: -37.8647, lng: 144.9696};
+var DEFAULT_CENTER_LOCATION_COORDS = {lat: -37.8647, lng: 144.9696};
+var DEFAULT_CENTER_LOCATION_NAME = 'St Kilda, Australia';
+var map = {};
+var placesObject = {};
 // Return this object from module, everything declared below as function will be hoisted above this
 return {
     init: init,
     updateLocation: updateLocation,
+    closeAllInfoWindows: closeAllInfoWindows,
+    openInfoWindow: openInfoWindow,
 };
 
 function init() {
+    createMap();
+    setWindowResize();
+    getGooglePlaces();
+    getFourSquarePlaces();
+    getYelpPlaces();
+}
 
+function updateLocation(locationName) {
+    var geocoder = new google.maps.Geocoder();
+    geocoder.geocode({
+        address: locationName,
+    }, function(results, status) {
+        console.log(results);
+        console.log(status);
+        if (status == 'OK') {
+            var lat = results[0].geometry.location.lat();
+            var lng = results[0].geometry.location.lng();
+            setLocalStorageMapCenter({lat: lat, lng: lng}, results[0].formatted_address);
+            viewModel.locationInput(getMapCenterName());
+
+            map.panTo({lat: lat, lng: lng});
+            placesObject = {};
+            getFourSquarePlaces();
+            getYelpPlaces();
+        } else {
+            // TODO: handle fail
+        }
+    });
+}
+
+function setWindowResize() {
+    $(window).resize(function () {
+        var h = $(window).height()
+        var offsetTop = 60; // Calculate the top offset
+
+        $('#map').css('height', (h - offsetTop));
+    }).resize();
+}
+
+function setLocalStorageMapCenter(coords, name) {
+    localStorage.setItem('neigborhoodMapCenterCoords', JSON.stringify(coords));
+    localStorage.setItem('neigborhoodMapCenterName', name);
+}
+
+function getMapCenterCoords() {
+    if (localStorage.hasOwnProperty('neigborhoodMapCenterCoords')) {
+        return JSON.parse(localStorage.neigborhoodMapCenterCoords);
+    } else {
+        return DEFAULT_CENTER_LOCATION_COORDS;
+    }
+}
+
+function getMapCenterName() {
+    return localStorage.neigborhoodMapCenterName || DEFAULT_CENTER_LOCATION_NAME;
+}
+
+function createMap() {
     // Create a map object and specify the DOM element for display.
-    var mapCenter = JSON.parse(localStorage.neigborhoodMapCenter) || DEFAULT_MAP_CENTER
-    var map = new google.maps.Map(document.getElementById('map'), {
-        center: mapCenter,
+    var centerLocationCoords = getMapCenterCoords();
+    var centerLocationName = getMapCenterName();
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: centerLocationCoords,
         scrollwheel: true,
         zoom: 14,
         mapTypeId: google.maps.MapTypeId.TERRAIN,
     });
     // TODO: handle map fail
+}
 
-    function createMarker(place) {
-        // Make marker a property of place,
-        // so it can be easily updated based on
-        // the properties of the place
-        place.marker = new mapIcons.Marker({
-            position: place.latLng,
-            map: map,
-            icon: {
-                path: mapIcons.MAP_PIN,
-                fillColor: '#00CCBB',
-                fillOpacity: 0.5,
-                strokeColor: '',
-                strokeWeight: 0
-            },
-            map_icon_label: '<span class="map-icon map-icon-bicycle-store"></span>',
-        });
-        place.marker.addListener('click', function() {
-            closeAllInfoWindows();
-            place.infoWindow.open(map, place.marker);
-        });
+function createMarker(place) {
+    // Make marker a property of place,
+    // so it can be easily updated based on
+    // the properties of the place
+    place.marker = new mapIcons.Marker({
+        position: place.latLng,
+        map: map,
+        icon: {
+            path: mapIcons.MAP_PIN,
+            fillColor: '#00CCBB',
+            fillOpacity: 0.5,
+            strokeColor: '',
+            strokeWeight: 0
+        },
+        map_icon_label: '<span class="map-icon map-icon-bicycle-store"></span>',
+    });
+    place.marker.addListener('click', function() {
+        openInfoWindow(place);
+    });
+}
+
+function openInfoWindow(place) {
+    console.log(place);
+    closeAllInfoWindows();
+    console.log(map);
+    place.infoWindow.open(map, place.marker);
+}
+
+function closeAllInfoWindows() {
+    viewModel.places().forEach(function(place) {
+        place.infoWindow.close();
+    });
+}
+
+function createInfoWindowContent(place) {
+    var content = $('<div class="info-window-content"></div>')[0];
+    $('<h3>' + place.name + '</h3>').appendTo(content);
+    if (place.hasOwnProperty('description')) {
+        $('<h4>' + place.description + '</h4>').appendTo(content);
     }
-
-    function createInfoWindowContent(place) {
-        var content = $('<div class="info-window-content"></div>')[0];
-        $('<h3>' + place.name + '</h3>').appendTo(content);
-        if (place.hasOwnProperty('description')) {
-            $('<h4>' + place.description + '</h4>').appendTo(content);
-        }
-        var infoWindowBody = $('<div class="info-window-body"></div>').appendTo(content);
-        var infoWindowBodyText = $('<div class="info-window-body-text"></div>').appendTo(infoWindowBody);
-        $('<h5>' + place.address + '</h5>').appendTo(infoWindowBodyText);
-        if (place.hasOwnProperty('phone')) {
-            $('<p>' + place.phone + '</p>').appendTo(infoWindowBodyText);
-        }
-        if (place.hasOwnProperty('fourSquareUrl')) {
-            $('<p><a href=' + place.fourSquareUrl + '><img src="images/Connect-to-Foursquare-150.png"></a></p>').appendTo(infoWindowBodyText);
-        }
-        if (place.hasOwnProperty('yelpUrl')) {
-            $('<p><a href=' + place.yelpUrl + '><img src="images/yelp_review_btn_dark.png"></a></p>').appendTo(infoWindowBodyText);
-        }
-        if (place.hasOwnProperty('open_now')) {
-            if (place.open_now) {
-                $('<p>Now Open!</p>').appendTo(infoWindowBodyText);
-            } else {
-                $('<p>Currently Closed</p>').appendTo(infoWindowBodyText);
-            }
-        }
-        if (place.hasOwnProperty('text')) {
-            $('<p>"' + place.text + '"</p>').appendTo(infoWindowBodyText);
-        }
-        if (place.hasOwnProperty('image')) {
-            $('<img src=' + place.image + '>').appendTo(infoWindowBody);
-        }
-        return content;
+    var infoWindowBody = $('<div class="info-window-body"></div>').appendTo(content);
+    var infoWindowBodyText = $('<div class="info-window-body-text"></div>').appendTo(infoWindowBody);
+    $('<h5>' + place.address + '</h5>').appendTo(infoWindowBodyText);
+    if (place.hasOwnProperty('phone')) {
+        $('<p>' + place.phone + '</p>').appendTo(infoWindowBodyText);
     }
-
-    function closeAllInfoWindows() {
-        viewModel.places().forEach(function(place) {
-            place.infoWindow.close();
-        });
+    if (place.hasOwnProperty('fourSquareUrl')) {
+        $('<p><a href=' + place.fourSquareUrl + '><img src="images/Connect-to-Foursquare-150.png"></a></p>').appendTo(infoWindowBodyText);
     }
-
-
-    /**
-     * API requests
-     */
-
-    // Store API results in object with address as key.
-    // This object will the be converted to array for Knockout, after cleanup.
-    var placesObject = {};
-    var addPlaceToPlacesObject = function(place) {
-        if (!placesObject.hasOwnProperty(place.address.toLowerCase())) {
-            placesObject[place.address.toLowerCase()] = place;
+    if (place.hasOwnProperty('yelpUrl')) {
+        $('<p><a href=' + place.yelpUrl + '><img src="images/yelp_review_btn_dark.png"></a></p>').appendTo(infoWindowBodyText);
+    }
+    if (place.hasOwnProperty('open_now')) {
+        if (place.open_now) {
+            $('<p>Now Open!</p>').appendTo(infoWindowBodyText);
         } else {
-            // Place is already in object just add properties it doesn't already have
-            var existingPlace = placesObject[place.address.toLowerCase()];
-            var propertiesToCheck = [
-                'phone',
-                'image',
-                'description',
-                'open_now',
-                'fourSquareUrl',
-                'yelpUrl',
-                'yelpSnippet',
-            ];
-            propertiesToCheck.forEach(function(property) {
-                if (place.hasOwnProperty(property) && !existingPlace.hasOwnProperty(property)) {
-                    existingPlace[property] = place[property];
-                }
-                existingPlace.infoWindow.setContent(createInfoWindowContent(existingPlace));
-                place.marker.setMap(null);
-            });
+            $('<p>Currently Closed</p>').appendTo(infoWindowBodyText);
         }
-    };
-    var updatePlacesArray = function() {
-        viewModel.places([]);
-        for (var place in placesObject) {
-            if (placesObject.hasOwnProperty(place)) {
-                viewModel.places.push(placesObject[place]);
-            }
-        }
-    };
+    }
+    if (place.hasOwnProperty('text')) {
+        $('<p>"' + place.text + '"</p>').appendTo(infoWindowBodyText);
+    }
+    if (place.hasOwnProperty('image')) {
+        $('<img src=' + place.image + '>').appendTo(infoWindowBody);
+    }
+    return content;
+}
 
+// Store API results in object with address as key.
+// This object will the be converted to array for Knockout, after cleanup.
+function addPlaceToPlacesObject(place) {
+    if (!placesObject.hasOwnProperty(place.address.toLowerCase())) {
+        placesObject[place.address.toLowerCase()] = place;
+    } else {
+        // Place is already in object just add properties it doesn't already have
+        var existingPlace = placesObject[place.address.toLowerCase()];
+        var propertiesToCheck = [
+            'phone',
+            'image',
+            'description',
+            'open_now',
+            'fourSquareUrl',
+            'yelpUrl',
+            'yelpSnippet',
+        ];
+        propertiesToCheck.forEach(function(property) {
+            if (place.hasOwnProperty(property) && !existingPlace.hasOwnProperty(property)) {
+                existingPlace[property] = place[property];
+            }
+            existingPlace.infoWindow.setContent(createInfoWindowContent(existingPlace));
+            place.marker.setMap(null);
+        });
+    }
+};
+
+function updatePlacesArray() {
+    viewModel.places([]);
+    for (var place in placesObject) {
+        if (placesObject.hasOwnProperty(place)) {
+            viewModel.places.push(placesObject[place]);
+        }
+    }
+};
+
+
+/**
+ * API requests
+ */
+function getGooglePlaces() {
     // Google places
     var service = new google.maps.places.PlacesService(map);
+    var centerLocationCoords = getMapCenterCoords();
     service.nearbySearch({
-        location: new google.maps.LatLng(mapCenter.lat, mapCenter.lng),
+        location: new google.maps.LatLng(centerLocationCoords.lat, centerLocationCoords.lng),
         radius: 3000,
         type: 'bicycle_store',
     }, gotPlaces);
@@ -173,14 +243,17 @@ function init() {
 
         return place;
     }
+}
 
+function getFourSquarePlaces() {
+    var centerLocationCoords = getMapCenterCoords();
     // Foursquare search
     var request = $.ajax('https://api.foursquare.com/v2/venues/search', {
         dataType: 'json',
         data: {
             client_id: tokens.fourSquareTokens.clientId,
             client_secret: tokens.fourSquareTokens.clientSecret,
-            ll: mapCenterlat.toString() + ',' + mapCenter.lng.toString(),
+            ll: centerLocationCoords.lat.toString() + ',' + centerLocationCoords.lng.toString(),
             query: 'bicycle',
             v: 20160310,
         },
@@ -237,7 +310,9 @@ function init() {
 
         return place;
     }
+}
 
+function getYelpPlaces() {
     // Yelp API
 
     // OAuth functions courtesy of MarkN from Udacity forums
@@ -254,7 +329,8 @@ function init() {
     }
 
     var yelp_url = 'https://api.yelp.com/v2/search';
-
+    var centerLocationCoords = getMapCenterCoords();
+    var centerLocationName = getMapCenterName();
     var parameters = {
         oauth_consumer_key: tokens.yelpTokens.consumerKey,
         oauth_token: tokens.yelpTokens.token,
@@ -263,8 +339,8 @@ function init() {
         oauth_signature_method: 'HMAC-SHA1',
         oauth_version: '1.0',
         term: 'bicycle_store',
-        cll: mapCenterlat.toString() + ',' + mapCenter.lng.toString(),
-        location: 'St Kilda',
+        cll: centerLocationCoords.lat.toString() + ',' + centerLocationCoords.lng.toString(),
+        location: centerLocationName,
         callback: 'cb'              // This is crucial to include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
     };
 
@@ -277,7 +353,7 @@ function init() {
     );
 
     // Send the API reqest
-    request = $.ajax({
+    var request = $.ajax({
         url: yelp_url,
         data: parameters,
         cache: true,                // This is crucial to include as well to prevent jQuery from adding on a cache-buster parameter "_=23489489749837", invalidating our oauth-signature
@@ -337,54 +413,29 @@ function init() {
 
         return place;
     }
-
-    // Function to remove minor differences in addresses,
-    // which prevent results for the same place from different
-    // APIs from matching.
-    function fixAddress(address) {
-        address = address.replace('.', '');
-        address = address.replace(/St$/, 'Street');
-        address = address.replace(/Rd$/, 'Road');
-        return address;
-    }
-
-    // Function to remove minor differences in suburb,
-    // which prevent results for the same place from different
-    // APIs from matching.
-    function fixSuburb(suburb) {
-        // Some fix abreviation of Saint Kilda
-        suburb = suburb.replace('.', '');
-        suburb = suburb.replace('St', 'Saint');
-        return suburb;
-    }
-
-    $(window).resize(function () {
-        var h = $(window).height(),
-            offsetTop = 60; // Calculate the top offset
-
-        $('#map').css('height', (h - offsetTop));
-    }).resize();
 }
 
-function updateLocation(locationName) {
-    var geocoder = new google.maps.Geocoder();
-    geocoder.geocode({
-        address: locationName,
-    }, function(results, status) {
-        console.log(results);
-        console.log(status);
-        if (status == 'OK') {
-            var lat = results[0].geometry.location.lat();
-            var lng = results[0].geometry.location.lng();
-            localStorage.setItem('neigborhoodMapCenter', JSON.stringify({
-                lat: lat,
-                lng: lng,
-            }));
-            viewModel.locationInput = results.formatted_address;
-        } else {
-            // TODO: handle fail
-        }
-    });
+
+
+// Function to remove minor differences in addresses,
+// which prevent results for the same place from different
+// APIs from matching.
+function fixAddress(address) {
+    address = address.replace('.', '');
+    address = address.replace(/St$/, 'Street');
+    address = address.replace(/Rd$/, 'Road');
+    return address;
 }
+
+// Function to remove minor differences in suburb,
+// which prevent results for the same place from different
+// APIs from matching.
+function fixSuburb(suburb) {
+    // Some fix abreviation of Saint Kilda
+    suburb = suburb.replace('.', '');
+    suburb = suburb.replace('St', 'Saint');
+    return suburb;
+}
+
 
 });

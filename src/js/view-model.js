@@ -186,14 +186,16 @@ define(['knockout', 'require'], function(ko, require) {
 
         self.selectPlace = function(place) {
             console.log(place);
-            place.infoWindow.open(map, place.marker);
+            var app = require('./app');
+            app.openInfoWindow(place);
         };
 
         // Hide markers which aren't in selected suburb
         self.suburbFilter.subscribe(function(suburbFilter) {
             self.places().forEach(function(place) {
+                var app = require('./app');
                 if (place.suburb == suburbFilter) {
-                    place.marker.setMap(map);
+                    place.marker.setMap(app.map);
                 } else {
                     place.marker.setMap(null);
                 }
