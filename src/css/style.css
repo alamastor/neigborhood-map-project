@@ -7,7 +7,7 @@ html, body {
 }
 
 #map {
-  height: calc(100% - 50px);
+  height: calc(100% - (1*50px + 52px));
   width: 75%;
   position: absolute;
   right: 0;
@@ -19,8 +19,13 @@ html, body {
   width: 25%;
   list-style-type: none;
   overflow: scroll;
-  height: calc(100% - 52px);
+  height: calc(100% - (1*50px + 52px));
   margin: 0;
+}
+@media (max-width: 767px) {
+  #places, #map {
+    height: calc(100% - (3*50px + 52px));
+  }
 }
 
 .dropdown {
@@ -37,4 +42,24 @@ html, body {
 
 .info-window-body {
   display: flex;
+  vertical-align: middle;
+}
+
+.api-attrib {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 50px;
+}
+
+.fail-text {
+  display: flex;
+  padding: 0.5em;
+  font-size: 0.7em;
+  color: red;
+}
+
+.attrib-image {
+  display: block;
+  height: 30px;
 }

@@ -58,16 +58,22 @@
     <li data-bind="text: $parent.longName($data), click: $parent.selectPlace"></li>
   </ul>
   <div id="map"></div>
+  <footer class="container-fluid">
+    <div id="attrib" class="row">
+      <div class="api-attrib col-sm-4">
+        <span data-bind="visible: googleFail" class="fail-text">Could not connect to Google.</span>
+        <img src="images/powered_by_google_on_white.png">
+      </div>
+      <div class="api-attrib col-sm-4">
+        <span data-bind="visible: yelpFail" class="fail-text">Could not connect to Yelp.</span>
+        <img src="images/yelp-logo-medium.png" class="attrib-image">
+      </div>
+      <div class="api-attrib col-sm-4">
+        <span data-bind="visible: foursqrFail" class="fail-text">Could not connect to Foursquare.</span>
+        <img src="images/Powered-by-Foursquare-one-color-300.png" class="attrib-image">
+      </div>
+    </div>
+  </footer>
   <script data-main="js/main" src="js/lib/require.js"></script>
-  <!--
-  <script src="js/lib/jquery.min.js"></script>
-  <script src="lib/js/bootstrap.min.js"></script>
-  <script src="js/lib/knockout.js"></script>
-  <script src="js/tokens.js"></script>
-  <script src="js/oauth-signature.js"></script>
-  <script src="js/app.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
-  <script src="lib/js/map-icons.min.js"></script>
-  -->
 </body>
 </html>

@@ -15,7 +15,6 @@ return {
 
 function init() {
     createMap();
-    setWindowResize();
     getGooglePlaces();
     getFourSquarePlaces();
     getYelpPlaces();
@@ -44,15 +43,6 @@ function updateLocation(locationName) {
     });
 }
 
-function setWindowResize() {
-    $(window).resize(function () {
-        var h = $(window).height()
-        var offsetTop = 60; // Calculate the top offset
-
-        $('#map').css('height', (h - offsetTop));
-    }).resize();
-}
-
 function setLocalStorageMapCenter(coords, name) {
     localStorage.setItem('neigborhoodMapCenterCoords', JSON.stringify(coords));
     localStorage.setItem('neigborhoodMapCenterName', name);
@@ -74,46 +64,64 @@ function createMap() {
     // Create a map object and specify the DOM element for display.
     var centerLocationCoords = getMapCenterCoords();
     var centerLocationName = getMapCenterName();
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: centerLocationCoords,
-        scrollwheel: true,
-        zoom: 14,
-        mapTypeId: google.maps.MapTypeId.TERRAIN,
-    });
-    // TODO: handle map fail
+    if (!(google.load == 'fail')) {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: centerLocationCoords,
+            scrollwheel: true,
+            zoom: 14,
+            mapTypeId: google.maps.MapTypeId.TERRAIN,
+        });
+        viewModel.googleFail(false);
+    } else {
+        // google maps load fail app cannot run, show fail text
+        viewModel.googleFail(true);
+    }
 }
 
 function createMarker(place) {
     // Make marker a property of place,
     // so it can be easily updated based on
     // the properties of the place
-    place.marker = new mapIcons.Marker({
-        position: place.latLng,
-        map: map,
-        icon: {
-            path: mapIcons.MAP_PIN,
-            fillColor: '#00CCBB',
-            fillOpacity: 0.5,
-            strokeColor: '',
-            strokeWeight: 0
-        },
-        map_icon_label: '<span class="map-icon map-icon-bicycle-store"></span>',
-    });
-    place.marker.addListener('click', function() {
-        openInfoWindow(place);
-    });
+    if (!(mapIcons.load = 'fail')) {
+        place.marker = new mapIcons.Marker({
+            position: place.latLng,
+            map: map,
+            icon: {
+                path: mapIcons.MAP_PIN,
+                fillColor: '#00CCBB',
+                fillOpacity: 0.5,
+                strokeColor: '',
+                strokeWeight: 0
+            },
+            map_icon_label: '<span class="map-icon map-icon-bicycle-store"></span>',
+        });
+        place.marker.addListener('click', function() {
+            openInfoWindow(place);
+        });
+    }
+}
+
+function addInfoWindow(place) {
+    if (!(mapIcons.load = 'fail')) {
+        place.infoWindow = new google.maps.InfoWindow();
+        place.infoWindow.setContent(createInfoWindowContent(place));
+    }
 }
 
 function openInfoWindow(place) {
     console.log(place);
     closeAllInfoWindows();
     console.log(map);
-    place.infoWindow.open(map, place.marker);
+    if (place.hasOwnProperty('marker')) {
+        place.infoWindow.open(map, place.marker);
+    }
 }
 
 function closeAllInfoWindows() {
     viewModel.places().forEach(function(place) {
-        place.infoWindow.close();
+        if (place.hasOwnProperty('infoWindow')) {
+            place.infoWindow.close();
+        }
     });
 }
 
@@ -172,8 +180,13 @@ function addPlaceToPlacesObject(place) {
             if (place.hasOwnProperty(property) && !existingPlace.hasOwnProperty(property)) {
                 existingPlace[property] = place[property];
             }
-            existingPlace.infoWindow.setContent(createInfoWindowContent(existingPlace));
-            place.marker.setMap(null);
+            // if connect to google failed, will have no place
+            if (existingPlace.hasOwnProperty('infoWindow')) {
+                existingPlace.infoWindow.setContent(createInfoWindowContent(existingPlace));
+            }
+            if (place.hasOwnProperty('marker')) {
+                place.marker.setMap(null);
+            }
         });
     }
 };
@@ -192,6 +205,10 @@ function updatePlacesArray() {
  * API requests
  */
 function getGooglePlaces() {
+    if (google.load = 'fail') {
+        // google failed to load don't continue
+        return
+    }
     // Google places
     var service = new google.maps.places.PlacesService(map);
     var centerLocationCoords = getMapCenterCoords();
@@ -207,8 +224,7 @@ function getGooglePlaces() {
             for (var i = 0; i < results.length; i++) {
                 var place = googlePlaceToPlace(results[i]);
                 createMarker(place);
-                place.infoWindow = new google.maps.InfoWindow();
-                place.infoWindow.setContent(createInfoWindowContent(place));
+                addInfoWindow(place)
                 addPlaceToPlacesObject(place);
             }
         } else {
@@ -268,17 +284,16 @@ function getFourSquarePlaces() {
             if (venue.location.hasOwnProperty('address')) {
                 var place = fourSqrVenueToPlace(venue);
                 createMarker(place);
-                place.infoWindow = new google.maps.InfoWindow();
-                place.infoWindow.setContent(createInfoWindowContent(place));
+                addInfoWindow(place)
                 addPlaceToPlacesObject(place);
             }
         });
         updatePlacesArray();
+        viewModel.foursqrFail(false);
     });
     request.fail(function(jqXHR, textStatus) {
-        console.log('failed');
-        console.log(jqXHR);
-        console.log(textStatus);
+        console.log('Foursquare ajax failed');
+        viewModel.foursqrFail(true);
     });
 
     function fourSqrVenueToPlace(venue) {
@@ -364,16 +379,15 @@ function getYelpPlaces() {
         msg.businesses.forEach(function(business) {
             var place = yelpBusToPlace(business);
             createMarker(place);
-            place.infoWindow = new google.maps.InfoWindow();
-            place.infoWindow.setContent(createInfoWindowContent(place));
+            addInfoWindow(place)
             addPlaceToPlacesObject(place);
         });
         updatePlacesArray();
+        viewModel.yelpFail(false);
     });
     request.fail(function(jqXHR, textStatus) {
-        console.log('failed');
-        console.log(jqXHR);
-        console.log(textStatus);
+        console.log('yelp ajax failed');
+        viewModel.yelpFail(true);
     });
     function cb(res) {
         console.log('Got Cb');

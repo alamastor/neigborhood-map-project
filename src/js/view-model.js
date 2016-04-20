@@ -217,6 +217,13 @@ define(['knockout', 'require'], function(ko, require) {
             }
             return place.name;
         };
+
+        /*
+         * Show api fail observables
+         */
+        self.googleFail = ko.observable(false);
+        self.yelpFail = ko.observable(false);
+        self.foursqrFail = ko.observable(false);
     }
     var viewModel = new ViewModel();
     ko.applyBindings(viewModel);
