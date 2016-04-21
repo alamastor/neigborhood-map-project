@@ -5,13 +5,6 @@ var DEFAULT_CENTER_LOCATION_COORDS = {lat: -37.8647, lng: 144.9696};
 var DEFAULT_CENTER_LOCATION_NAME = 'St Kilda, Australia';
 var map = {};
 var placesObject = {};
-// Return this object from module, everything declared below as function will be hoisted above this
-return {
-    init: init,
-    updateLocation: updateLocation,
-    closeAllInfoWindows: closeAllInfoWindows,
-    openInfoWindow: openInfoWindow,
-};
 
 function init() {
     createMap();
@@ -82,7 +75,7 @@ function createMarker(place) {
     // Make marker a property of place,
     // so it can be easily updated based on
     // the properties of the place
-    if (!(mapIcons.load = 'fail')) {
+    if (!(mapIcons.load == 'fail')) {
         place.marker = new mapIcons.Marker({
             position: place.latLng,
             map: map,
@@ -100,9 +93,17 @@ function createMarker(place) {
         });
     }
 }
+mapIcons.Marker.prototype.show = function() {
+    this.setMap(map);
+};
+
+mapIcons.Marker.prototype.hide = function() {
+    this.setMap(null);
+};
+
 
 function addInfoWindow(place) {
-    if (!(mapIcons.load = 'fail')) {
+    if (!(mapIcons.load == 'fail')) {
         place.infoWindow = new google.maps.InfoWindow();
         place.infoWindow.setContent(createInfoWindowContent(place));
     }
@@ -205,7 +206,7 @@ function updatePlacesArray() {
  * API requests
  */
 function getGooglePlaces() {
-    if (google.load = 'fail') {
+    if (google.load == 'fail') {
         // google failed to load don't continue
         return
     }
@@ -300,7 +301,7 @@ function getFourSquarePlaces() {
         var place = {};
         place.latLng = {
             lat: venue.location.lat,
-            lng: venue.location.lng
+            lng: venue.location.lng,
         };
         place.name = venue.name;
         place.suburb = fixSuburb(venue.location.city.split(',')[0].trim());
@@ -451,5 +452,11 @@ function fixSuburb(suburb) {
     return suburb;
 }
 
+return {
+    init: init,
+    updateLocation: updateLocation,
+    closeAllInfoWindows: closeAllInfoWindows,
+    openInfoWindow: openInfoWindow,
+};
 
 });

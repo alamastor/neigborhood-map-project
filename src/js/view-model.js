@@ -69,6 +69,10 @@ define(['knockout', 'require'], function(ko, require) {
             app.updateLocation(self.locationInput());
         }
 
+        self.hideNav = ko.observable(true);
+        self.toggleNav = function() {
+            self.hideNav(!self.hideNav());
+        }
         /*
          * Search form section
          */
@@ -188,16 +192,18 @@ define(['knockout', 'require'], function(ko, require) {
             console.log(place);
             var app = require('./app');
             app.openInfoWindow(place);
+            self.hideNav(true);
         };
 
         // Hide markers which aren't in selected suburb
         self.suburbFilter.subscribe(function(suburbFilter) {
             self.places().forEach(function(place) {
-                var app = require('./app');
-                if (place.suburb == suburbFilter) {
-                    place.marker.setMap(app.map);
+                if (suburbFilter == '' || place.suburb == suburbFilter) {
+                    place.marker.show();
+                    //place.marker.setMap(app.map);
                 } else {
-                    place.marker.setMap(null);
+                    place.marker.hide();
+                    //place.marker.setMap(null);
                 }
             });
         });

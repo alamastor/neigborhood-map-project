@@ -1,10 +1,16 @@
 requirejs.config({
     baseUrl: 'js/lib',
     shim: {
+        bootstrap: {
+            deps: ['jquery']
+        },
         '../../lib/js/map-icons.min': {
             deps: ['google'],
             exports: 'mapIcons',
         }
+    },
+    paths: {
+        bootstrap: '../../lib/js/bootstrap.min',
     }
 });
 
@@ -22,6 +28,9 @@ define('mapIcons', ['../../lib/js/map-icons.min'], function() {
         MAP_PIN: MAP_PIN,
     }
 })
+
+// Call bootstrap to force it to load and be used.
+requirejs(['bootstrap'], function() {});
 
 requirejs(['jquery', '../app'],
 function(         $,     app) {
