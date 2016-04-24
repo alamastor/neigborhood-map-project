@@ -1,17 +1,63 @@
 html, body {
   height: 100%;
+  font-family: 'Quattrocento Sans', sans-serif;
 }
 
 main {
   display: flex;
-  height: calc(100vh - (1*50px + 52px));
+  height: calc(100% - (1*50px + 142px));
   width: 100vw;
   position: absolute;
-  top: 52px;
+  top: 142px;
+}
+
+#header-text {
+  font: normal 1.5em 'Quattrocento Sans', sans-serif;
+  color: darkslategrey;
+  display: flex;
+  margin: 1em;
+}
+#header-text-main {
+  font: normal 2em Yesteryear, sans-serif;
+  color: midnightblue;
+  line-height: 0;
+  padding-right: 0.5em;
+  text-shadow: 6px 6px rgba(47, 79, 79, 0.3);
+  width: 6.4em;
+}
+
+#header-text-loc {
+  height: 1.5em;
+  padding-top: 0.2em;
+  margin: 0;
+  max-width: 60vw;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+
 }
 @media (max-width: 767px) {
   main {
-    height: calc(100% - (3*50px + 52px));
+    height: calc(100% - (3*50px + 92px));
+    top: 92px;
+  }
+
+  #header-text {
+    flex-direction: column;
+    padding: 0;
+  }
+
+  #header-text-main {
+    font-size: 1.2em;
+  }
+
+  #header-text-loc {
+    font-size: 0.8em;
+  }
+}
+@media (min-width: 768px) {
+  .navbar-collapse {
+    clear: left
   }
 }
 
@@ -19,11 +65,16 @@ footer {
   position: absolute;
   bottom: 0;
   width: 100%;
+  background-color: lightgrey;
 }
+
 
 #header-nav {
   margin-bottom: 0;
   z-index: 1;
+  background-color: lightgrey;
+  border-color: lightgrey;
+  border-radius: 0;
 }
 
 #map {
@@ -36,17 +87,48 @@ footer {
   }
 }
 
+.place {
+  padding: 0.25em 0 0.25em 1em;
+  margin: 0;
+  color: darkslategrey;
+}
+.place:hover {
+  background-color: lightgrey;
+}
+
+.place-name {
+  margin: 0;
+  font-weight: bold;
+}
+.place-suburb {
+  margin: 0;
+}
+
 #places {
   width: 25%;
   list-style-type: none;
-  overflow: scroll;
+  overflow-y: scroll;
+  overflow-x: hidden;
   height: 100%;
   margin: 0;
+  padding: 0;
 }
 
 #nav-places {
   height: 25vh;
-  overflow: scroll;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  list-style-type: none;
+  padding: 0;
+  background: white;
+}
+
+.nav-place {
+  padding: 0.2em
+}
+
+.nav-place:hover {
+  background-color: lightgrey;
 }
 
 .autocomp-menu {
@@ -73,10 +155,20 @@ footer {
   display: flex;
   padding: 0.5em;
   font-size: 0.7em;
-  color: red;
+  color: firebrick;
 }
 
 .attrib-image {
   display: block;
   height: 30px;
 }
+
+::-webkit-scrollbar {
+      width: 15px;
+} /* this targets the default scrollbar (compulsory) */
+::-webkit-scrollbar-track {
+  background-color: white;
+} /* the new scrollbar will have a flat appearance with the set background color */
+::-webkit-scrollbar-thumb {
+  background-color: lightgrey;
+} /* this will style the thumb, ignoring the track */
