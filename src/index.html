@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8">
   <link href="lib/css/bootstrap.min.css" rel=stylesheet>
+  <link href='https://fonts.googleapis.com/css?family=Quattrocento+Sans|Yesteryear' rel='stylesheet' type='text/css'>
   <link href="css/style.css" rel=stylesheet>
   <link href="lib/css/map-icons.min.css" rel=stylesheet>
 </head>
@@ -18,6 +19,10 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
+        <div id="header-text" class="navbar-brand">
+          <h1 id="header-text-main">Local Bike Shops</h1>
+          <h2 id="header-text-loc" data-bind="text: searchLocation"></h2>
+        </div>
       </div>
 
       <div class="collapse navbar-collapse responsive-collapse" data-bind="css: {collapse: hideNav}">
@@ -59,14 +64,20 @@
           <button type="submit" class="btn btn-default">Submit</button>
         </form>
         <ul id="nav-places" class="visible-xs" data-bind="foreach: filteredPlaces">
-          <li data-bind="text: $parent.longName($data), click: $parent.selectPlace"></li>
+          <li class="nav-place" data-bind="click: $parent.selectPlace">
+            <p class="place-name" data-bind="text: $data.name"></p>
+            <p class="place-suburb" data-bind="text: $data.suburb"></p>
+          </li>
         </ul>
       </div><!--collapse navbar-collapse-->
     </div><!--container-fluid-->
   </nav>
   <main>
     <ul id="places" class="hidden-xs" data-bind="foreach: filteredPlaces">
-      <li data-bind="text: $parent.longName($data), click: $parent.selectPlace"></li>
+      <li class="place" data-bind="click: $parent.selectPlace">
+        <p class="place-name" data-bind="text: $data.name"></p>
+        <p class="place-suburb" data-bind="text: $data.suburb"></p>
+      </li>
     </ul>
     <div id="map"></div>
   </main>
