@@ -23,17 +23,36 @@ function updateLocation(locationName) {
         if (status == 'OK') {
             var lat = results[0].geometry.location.lat();
             var lng = results[0].geometry.location.lng();
-            setLocalStorageMapCenter({lat: lat, lng: lng}, results[0].formatted_address);
+            var placeName = placeNameFromGeocoderResults(results);
+            setLocalStorageMapCenter({lat: lat, lng: lng}, placeName);
             viewModel.locationInput(getMapCenterName());
+            viewModel.searchLocation(getMapCenterName());
 
             map.panTo({lat: lat, lng: lng});
             placesObject = {};
+            getGooglePlaces();
             getFourSquarePlaces();
             getYelpPlaces();
         } else {
             // TODO: handle fail
         }
     });
+}
+
+function placeNameFromGeocoderResults(results) {
+    var placeNameComponents = [];
+    var componentsToLookFor = ['locality', 'administrative_area_level_1', 'country'];
+    var addressComponents = results[0].address_components;
+    componentsToLookFor.forEach(function(componentToLookFor) {
+        addressComponents.forEach(function(component) {
+            if (component.types.indexOf(componentToLookFor) != -1) {
+                // Found component
+                placeNameComponents.push(component.long_name);
+                return;
+            }
+        });
+    });
+    return placeNameComponents.join(', ');
 }
 
 function setLocalStorageMapCenter(coords, name) {
@@ -57,6 +76,7 @@ function createMap() {
     // Create a map object and specify the DOM element for display.
     var centerLocationCoords = getMapCenterCoords();
     var centerLocationName = getMapCenterName();
+    viewModel.searchLocation(centerLocationName);
     if (!(google.load == 'fail')) {
         map = new google.maps.Map(document.getElementById('map'), {
             center: centerLocationCoords,
@@ -81,8 +101,8 @@ function createMarker(place) {
             map: map,
             icon: {
                 path: mapIcons.MAP_PIN,
-                fillColor: '#00CCBB',
-                fillOpacity: 0.5,
+                fillColor: 'darkslategrey',
+                fillOpacity: 0.8,
                 strokeColor: '',
                 strokeWeight: 0
             },
@@ -378,10 +398,16 @@ function getYelpPlaces() {
     request.done(function(msg) {
         console.log(msg);
         msg.businesses.forEach(function(business) {
-            var place = yelpBusToPlace(business);
-            createMarker(place);
-            addInfoWindow(place)
-            addPlaceToPlacesObject(place);
+            // Don't keep results that don't include an address.
+            // Could determine this from coords, but all results
+            // without an address contain very little information,
+            // and are hard to use with other API results.
+            if (business.location.hasOwnProperty('address') && business.location.address.length > 0) {
+                var place = yelpBusToPlace(business);
+                createMarker(place);
+                addInfoWindow(place)
+                addPlaceToPlacesObject(place);
+            }
         });
         updatePlacesArray();
         viewModel.yelpFail(false);
@@ -446,8 +472,8 @@ function fixAddress(address) {
 // which prevent results for the same place from different
 // APIs from matching.
 function fixSuburb(suburb) {
-    // Some fix abreviation of Saint Kilda
     suburb = suburb.replace('.', '');
+    // Fix abreviation of Saint Kilda
     suburb = suburb.replace('St', 'Saint');
     return suburb;
 }

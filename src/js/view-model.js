@@ -20,6 +20,7 @@ define(['knockout', 'require'], function(ko, require) {
             });
         });
 
+        self.searchLocation = ko.observable('');
 
         /**
          * Places filtering section
