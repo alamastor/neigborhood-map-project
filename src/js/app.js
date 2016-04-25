@@ -7,52 +7,49 @@ var map = {};
 var placesObject = {};
 
 function init() {
+    setTextClear();
     createMap();
     getGooglePlaces();
     getFourSquarePlaces();
     getYelpPlaces();
 }
 
-function updateLocation(locationName) {
-    var geocoder = new google.maps.Geocoder();
-    geocoder.geocode({
-        address: locationName,
-    }, function(results, status) {
-        console.log(results);
-        console.log(status);
-        if (status == 'OK') {
-            var lat = results[0].geometry.location.lat();
-            var lng = results[0].geometry.location.lng();
-            var placeName = placeNameFromGeocoderResults(results);
-            setLocalStorageMapCenter({lat: lat, lng: lng}, placeName);
-            viewModel.locationInput(getMapCenterName());
-            viewModel.searchLocation(getMapCenterName());
+function setTextClear() {
+    $(".hasclear").keyup(function () {
+        var self = $(this);
+        self.next('span').toggle(Boolean(self.val()));
+    });
 
-            map.panTo({lat: lat, lng: lng});
-            placesObject = {};
-            getGooglePlaces();
-            getFourSquarePlaces();
-            getYelpPlaces();
-        } else {
-            // TODO: handle fail
-        }
+    $(".clearer").hide($(this).prev('input').val());
+
+    $(".clearer").click(function () {
+        viewModel.searchTextFilter('');
+        $(this).prev('input').focus();
+        $(this).hide();
     });
 }
 
-function placeNameFromGeocoderResults(results) {
-    var placeNameComponents = [];
-    var componentsToLookFor = ['locality', 'administrative_area_level_1', 'country'];
-    var addressComponents = results[0].address_components;
-    componentsToLookFor.forEach(function(componentToLookFor) {
-        addressComponents.forEach(function(component) {
-            if (component.types.indexOf(componentToLookFor) != -1) {
-                // Found component
-                placeNameComponents.push(component.long_name);
-                return;
-            }
-        });
-    });
-    return placeNameComponents.join(', ');
+function updateLocation(location) {
+    var lat = location.geometry.location.lat();
+    var lng = location.geometry.location.lng();
+    var placeName = location.formatted_address;
+    setLocalStorageMapCenter({lat: lat, lng: lng}, placeName);
+    viewModel.searchLocation(getMapCenterName());
+    viewModel.suburbFilter('');
+    map.panTo({lat: lat, lng: lng});
+
+    // Need to delete the markers and infowindows manually,
+    // or they stay attached to map after their object is destroyed.
+    for(var place in placesObject) {
+        if (placesObject.hasOwnProperty(place)) {
+            placesObject[place].marker.setMap(null);
+            delete placesObject[place].infoWindow;
+        }
+    }
+    placesObject = {};
+    getGooglePlaces();
+    getFourSquarePlaces();
+    getYelpPlaces();
 }
 
 function setLocalStorageMapCenter(coords, name) {
@@ -83,6 +80,13 @@ function createMap() {
             scrollwheel: true,
             zoom: 14,
             mapTypeId: google.maps.MapTypeId.TERRAIN,
+        });
+        var locationInput = $('#location-input')[0];
+        var autocomplete = new google.maps.places.Autocomplete(locationInput, {types: ['(regions)']});
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            updateLocation(place);
+            viewModel.locationInput('');
         });
         viewModel.googleFail(false);
     } else {

@@ -50,6 +50,9 @@ define(['knockout', 'require'], function(ko, require) {
                 var searchTextOK = self.longName(place).slice(0, strLen).toLowerCase() == self.searchTextFilter().toLowerCase();
                 if (suburbOK && searchTextOK) {
                     filtered.push(place);
+                    place.marker.show();
+                } else {
+                    place.marker.hide();
                 }
             });
             return filtered;
@@ -65,10 +68,6 @@ define(['knockout', 'require'], function(ko, require) {
          * Location change section
          */
         self.locationInput = ko.observable('');
-        self.locationSubmit = function() {
-            var app = require('./app');
-            app.updateLocation(self.locationInput());
-        }
 
         self.hideNav = ko.observable(true);
         self.toggleNav = function() {
@@ -86,9 +85,8 @@ define(['knockout', 'require'], function(ko, require) {
                 self.autoCompSelect(self.filteredPlaces()[0]);
             } else {
                 // Not done selecting, do nothing
-                return;
+                self.showAutoCompMenu(false);
             }
-            self.placeSelected(self.filteredPlaces[0]);
         };
 
         // Clear search text, called by view
@@ -111,10 +109,11 @@ define(['knockout', 'require'], function(ko, require) {
             }
         });
 
-        // Call to accept the autocomple option, and set filtering based on it
+        // Call to accept the autocomplete option, and set filtering based on it
         self.autoCompSelect = function(place) {
             self.searchTextFilter(self.longName(place));
             self.showAutoCompMenu(false);
+            self.selectPlace(self.filteredPlaces()[0]);
         };
 
         // Observable which represents the place which is
