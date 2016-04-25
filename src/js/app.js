@@ -154,12 +154,12 @@ function closeAllInfoWindows() {
 
 function createInfoWindowContent(place) {
     var content = $('<div class="info-window-content"></div>')[0];
+    $('<h3>' + place.name + '</h3>').appendTo(content);
+    if (place.hasOwnProperty('description')) {
+        $('<h4 class="info-window-place-description">' + place.description + '</h4>').appendTo(content);
+    }
     var infoWindowBody = $('<div class="info-window-body"></div>').appendTo(content);
     var infoWindowBodyText = $('<div class="info-window-body-text"></div>').appendTo(infoWindowBody);
-    $('<h3>' + place.name + '</h3>').appendTo(infoWindowBodyText);
-    if (place.hasOwnProperty('description')) {
-        $('<h4 class="info-window-place-description">' + place.description + '</h4>').appendTo(infoWindowBodyText);
-    }
     $('<h5>' + place.address + '</h5>').appendTo(infoWindowBodyText);
     if (place.hasOwnProperty('phone')) {
         $('<p>' + place.phone + '</p>').appendTo(infoWindowBodyText);
@@ -181,7 +181,7 @@ function createInfoWindowContent(place) {
         $('<p>"' + place.text + '"</p>').appendTo(infoWindowBodyText);
     }
     if (place.hasOwnProperty('image')) {
-        $('<img class="info-window-image" src=' + place.image + '>').appendTo(infoWindowBody);
+        $('<div class="info-window-image-container"><img class="info-window-image" src=' + place.image + '></div>').appendTo(infoWindowBody);
     }
     return content;
 }

@@ -17,6 +17,7 @@ main {
   display: flex;
   margin: 1em;
 }
+
 #header-text-main {
   font: normal 2em Yesteryear, sans-serif;
   color: midnightblue;
@@ -34,8 +35,8 @@ main {
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
-
 }
+
 @media (max-width: 767px) {
   main {
     height: calc(100% - (3*50px + 92px));
@@ -68,13 +69,16 @@ footer {
   background-color: lightgrey;
 }
 
-
 #header-nav {
   margin-bottom: 0;
   z-index: 1;
   background-color: lightgrey;
   border-color: lightgrey;
   border-radius: 0;
+}
+
+#location-input {
+  margin-left: 0;
 }
 
 .clearer {
@@ -143,6 +147,13 @@ footer {
   background: grey;
 }
 
+.suburb {
+  margin-left: 0.2em;
+}
+.suburb:hover {
+  background-color: lightgrey;
+}
+
 .api-attrib {
   display: flex;
   justify-content: space-around;
@@ -183,6 +194,8 @@ footer {
 }
 
 .info-window-image {
+  display: block;
+  height: auto;
   margin: 0.5em;
 }
 

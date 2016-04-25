@@ -52,15 +52,15 @@
             <span class="caret"></span>
           </button>
           <ul class="dropdown-menu">
-            <li data-bind="click: setSuburbFilter('')"><b>All Suburbs</b></li>
+            <li class="suburb" data-bind="click: setSuburbFilter('')"><b>All Suburbs</b></li>
             <!-- ko foreach:  uniqueSuburbs -->
-              <li data-bind="text: $data, click: $parent.setSuburbFilter"></li>
+              <li class="suburb" data-bind="text: $data, click: $parent.setSuburbFilter"></li>
             <!-- /ko -->
           </ul>
         </div>
-              <input type="text" class="form-control navbar-form navbar-right" id="location-input"
-                placeholder="Your Location"
-                data-bind="textInput: locationInput" />
+        <input type="text" class="form-control navbar-form navbar-right" id="location-input"
+          placeholder="Your Location"
+          data-bind="textInput: locationInput" />
         <ul id="nav-places" class="visible-xs" data-bind="foreach: filteredPlaces">
           <li class="nav-place" data-bind="click: $parent.selectPlace">
             <p class="place-name" data-bind="text: $data.name"></p>
