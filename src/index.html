@@ -37,7 +37,7 @@
               </div>
               <ul class="dropdown-menu autocomp-menu" data-bind="visible: showAutoCompMenu(), foreach: filteredPlaces">
                 <li class="autocomp-item"
-                    data-bind="text: $parent.longName($data), css: {highlight: $data==$parent.autoCompHighlightItem()}, click: $parent.autoCompSelect, event: {mouseover: $parent.setAutoCompHighlight}"
+                    data-bind="text: $parent.longName($data), css: {highlight: $data==$parent.autoCompHighlightItem()}, click: $parent.autoCompSelect, clickBubble: false, event: {mouseover: $parent.setAutoCompHighlight}"
                   >
                 </li>
               </ul>

@@ -58,12 +58,6 @@ define(['knockout', 'require'], function(ko, require) {
             return filtered;
         });
 
-        self.placeSelected = function(place) {
-            // TODO: Do things with selected places here
-            console.log('TODO: Search complete stuff');
-            console.log(place);
-        };
-
         /*
          * Location change section
          */
@@ -104,6 +98,9 @@ define(['knockout', 'require'], function(ko, require) {
             self.autoCompHighlightItem(null);
             if ((0 < self.filteredPlaces().length) && (self.filteredPlaces().length < 10)) {
                 self.showAutoCompMenu(true);
+                $('body').click(function() {
+                    self.showAutoCompMenu(false);
+                });
             } else {
                 self.showAutoCompMenu(false);
             }

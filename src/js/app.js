@@ -14,6 +14,8 @@ function init() {
     getYelpPlaces();
 }
 
+// code to add clear button to input text based
+// on http://www.bootply.com/130682
 function setTextClear() {
     $(".hasclear").keyup(function () {
         var self = $(this);
