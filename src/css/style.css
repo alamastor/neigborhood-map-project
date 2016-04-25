@@ -143,11 +143,6 @@ footer {
   background: grey;
 }
 
-.info-window-body {
-  display: flex;
-  vertical-align: middle;
-}
-
 .api-attrib {
   display: flex;
   justify-content: space-around;
@@ -176,3 +171,18 @@ footer {
 ::-webkit-scrollbar-thumb {
   background-color: lightgrey;
 } /* this will style the thumb, ignoring the track */
+
+.info-window-body {
+  font-family: 'Quattrocento Sans';
+  display: flex;
+  vertical-align: middle;
+}
+
+.info-window-place-description {
+  text-transform: capitalize;
+}
+
+.info-window-image {
+  margin: 0.5em;
+}
+
