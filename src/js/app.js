@@ -31,6 +31,25 @@ var map = {};
  */
 var placesObject = {};
 
+
+function Place(
+    lat, lng, name, suburb, address, image, description,
+    open_now, phone, fourSquareUrl, yelpSnippet, yelpUrl
+) {
+    this.latLng = {lat: lat, lng: lng};
+    this.name = name;
+    this.suburb = suburb;
+    this.address = address;
+    this.image = image;
+    this.description = description;
+    this.open_now = open_now;
+    this.phone = phone;
+    this.fourSquareUrl = fourSquareUrl;
+    this.yelpSnippet = yelpSnippet;
+    this.yelpUrl = yelpUrl;
+}
+
+
 function init() {
     setTextClear();
     createMap();
@@ -122,13 +141,13 @@ function createMap() {
     }
 }
 
-function createMarker(place) {
+Place.prototype.createMarker = function() {
     // Make marker a property of place,
     // so it can be easily updated based on
     // the properties of the place
     if (!(mapIcons.load == 'fail')) {
-        place.marker = new mapIcons.Marker({
-            position: place.latLng,
+        this.marker = new mapIcons.Marker({
+            position: this.latLng,
             map: map,
             icon: {
                 path: mapIcons.MAP_PIN,
@@ -139,8 +158,9 @@ function createMarker(place) {
             },
             map_icon_label: '<span class="map-icon map-icon-bicycle-store"></span>',
         });
-        place.marker.addListener('click', function() {
-            openInfoWindow(place);
+        var self = this;
+        this.marker.addListener('click', function() {
+            self.openInfoWindow();
         });
     }
 }
@@ -153,19 +173,17 @@ mapIcons.Marker.prototype.hide = function() {
 };
 
 
-function addInfoWindow(place) {
+Place.prototype.addInfoWindow = function() {
     if (!(mapIcons.load == 'fail')) {
-        place.infoWindow = new google.maps.InfoWindow();
-        place.infoWindow.setContent(createInfoWindowContent(place));
+        this.infoWindow = new google.maps.InfoWindow();
+        this.updateInfoWindowContent();
     }
-}
+};
 
-function openInfoWindow(place) {
-    console.log(place);
+Place.prototype.openInfoWindow = function() {
     closeAllInfoWindows();
-    console.log(map);
-    if (place.hasOwnProperty('marker')) {
-        place.infoWindow.open(map, place.marker);
+    if (this.hasOwnProperty('marker')) {
+        this.infoWindow.open(map, this.marker);
     }
 }
 
@@ -177,38 +195,38 @@ function closeAllInfoWindows() {
     });
 }
 
-function createInfoWindowContent(place) {
+Place.prototype.updateInfoWindowContent = function() {
     var content = $('<div class="info-window-content"></div>')[0];
-    $('<h3>' + place.name + '</h3>').appendTo(content);
-    if (place.hasOwnProperty('description')) {
-        $('<h4 class="info-window-place-description">' + place.description + '</h4>').appendTo(content);
+    $('<h3>' + this.name + '</h3>').appendTo(content);
+    if (this.description) {
+        $('<h4 class="info-window-place-description">' + this.description + '</h4>').appendTo(content);
     }
     var infoWindowBody = $('<div class="info-window-body"></div>').appendTo(content);
     var infoWindowBodyText = $('<div class="info-window-body-text"></div>').appendTo(infoWindowBody);
-    $('<h5>' + place.address + '</h5>').appendTo(infoWindowBodyText);
-    if (place.hasOwnProperty('phone')) {
-        $('<p>' + place.phone + '</p>').appendTo(infoWindowBodyText);
+    $('<h5>' + this.address + '</h5>').appendTo(infoWindowBodyText);
+    if (this.phone) {
+        $('<p>' + this.phone + '</p>').appendTo(infoWindowBodyText);
     }
-    if (place.hasOwnProperty('fourSquareUrl')) {
-        $('<p><a href=' + place.fourSquareUrl + '><img src="images/Connect-to-Foursquare-150.png"></a></p>').appendTo(infoWindowBodyText);
+    if (this.fourSquareUrl) {
+        $('<p><a href=' + this.fourSquareUrl + '><img src="images/Connect-to-Foursquare-150.png"></a></p>').appendTo(infoWindowBodyText);
     }
-    if (place.hasOwnProperty('yelpUrl')) {
-        $('<p><a href=' + place.yelpUrl + '><img src="images/yelp_review_btn_dark.png"></a></p>').appendTo(infoWindowBodyText);
+    if (this.yelpUrl) {
+        $('<p><a href=' + this.yelpUrl + '><img src="images/yelp_review_btn_dark.png"></a></p>').appendTo(infoWindowBodyText);
     }
-    if (place.hasOwnProperty('open_now')) {
-        if (place.open_now) {
+    if (this.open_now != null) {
+        if (this.open_now) {
             $('<p>Now Open!</p>').appendTo(infoWindowBodyText);
         } else {
             $('<p>Currently Closed</p>').appendTo(infoWindowBodyText);
         }
     }
-    if (place.hasOwnProperty('text')) {
-        $('<p>"' + place.text + '"</p>').appendTo(infoWindowBodyText);
+    if (this.yelpSnippet) {
+        $('<p>"' + this.yelpSnippet + '"</p>').appendTo(infoWindowBodyText);
     }
-    if (place.hasOwnProperty('image')) {
-        $('<div class="info-window-image-container"><img class="info-window-image" src=' + place.image + '></div>').appendTo(infoWindowBody);
+    if (this.image) {
+        $('<div class="info-window-image-container"><img class="info-window-image" src=' + this.image + '></div>').appendTo(infoWindowBody);
     }
-    return content;
+    this.infoWindow.setContent(content);
 }
 
 // Store API results in object with address as key.
@@ -229,12 +247,12 @@ function addPlaceToPlacesObject(place) {
             'yelpSnippet',
         ];
         propertiesToCheck.forEach(function(property) {
-            if (place.hasOwnProperty(property) && !existingPlace.hasOwnProperty(property)) {
+            if (place[property] != null && existingPlace[property] === null) {
                 existingPlace[property] = place[property];
             }
             // if connect to google failed, will have no place
             if (existingPlace.hasOwnProperty('infoWindow')) {
-                existingPlace.infoWindow.setContent(createInfoWindowContent(existingPlace));
+                existingPlace.updateInfoWindowContent(existingPlace);
             }
             if (place.hasOwnProperty('marker')) {
                 place.marker.setMap(null);
@@ -252,7 +270,6 @@ function updatePlacesArray() {
     }
 };
 
-
 /**
  * API requests
  */
@@ -268,15 +285,15 @@ function getGooglePlaces() {
         location: new google.maps.LatLng(centerLocationCoords.lat, centerLocationCoords.lng),
         radius: 3000,
         type: 'bicycle_store',
-    }, gotPlaces);
+    }, gotGooglePlaces);
 
-    function gotPlaces(results, status) {
+    function gotGooglePlaces(results, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
             console.log(results);
             for (var i = 0; i < results.length; i++) {
                 var place = googlePlaceToPlace(results[i]);
-                createMarker(place);
-                addInfoWindow(place)
+                place.createMarker();
+                place.addInfoWindow();
                 addPlaceToPlacesObject(place);
             }
         } else {
@@ -286,30 +303,32 @@ function getGooglePlaces() {
     }
 
     function googlePlaceToPlace(googlePlace) {
-        var place = {};
-        place.latLng = {
-            lat: googlePlace.geometry.location.lat(),
-            lng: googlePlace.geometry.location.lng()
-        };
-        place.name = googlePlace.name;
-        place.suburb = fixSuburb(googlePlace.vicinity.split(',')[1].trim());
-        place.address = fixAddress(googlePlace.vicinity.split(',')[0].trim()) + ', ' + place.suburb;
+        var lat = googlePlace.geometry.location.lat();
+        var lng = googlePlace.geometry.location.lng();
+        var name = googlePlace.name;
+        var suburb = fixSuburb(googlePlace.vicinity.split(',')[1].trim());
+        var address = fixAddress(googlePlace.vicinity.split(',')[0].trim()) + ', ' + suburb;
 
+        var image;
         if (googlePlace.hasOwnProperty('photos') && googlePlace.photos.length > 0) {
-            place.image = googlePlace.photos[0].getUrl({
+            image = googlePlace.photos[0].getUrl({
                 maxWidth: 100,
                 maxHeight: 100,
             });
         }
 
-        // TODO: capitalize this string with css
-        place.description = googlePlace.types[0].replace('_', ' ');
+        // description is capitalized in css
+        var description = googlePlace.types[0].replace('_', ' ');
 
+        var open_now;
         if (googlePlace.hasOwnProperty('opening_hours')) {
-            place.open_now = googlePlace.opening_hours.open_now;
+            open_now = googlePlace.opening_hours.open_now;
         }
 
-        return place;
+        return new Place(
+            lat, lng, name, suburb, address, image,
+            description, open_now, null, null, null, null
+        );
     }
 }
 
@@ -335,8 +354,8 @@ function getFourSquarePlaces() {
             // and are hard to use with other API results.
             if (venue.location.hasOwnProperty('address')) {
                 var place = fourSqrVenueToPlace(venue);
-                createMarker(place);
-                addInfoWindow(place)
+                place.createMarker();
+                place.addInfoWindow(place)
                 addPlaceToPlacesObject(place);
             }
         });
@@ -349,33 +368,35 @@ function getFourSquarePlaces() {
     });
 
     function fourSqrVenueToPlace(venue) {
-        var place = {};
-        place.latLng = {
-            lat: venue.location.lat,
-            lng: venue.location.lng,
-        };
-        place.name = venue.name;
-        place.suburb = fixSuburb(venue.location.city.split(',')[0].trim());
-        place.address = fixAddress(venue.location.address) + ', ' + place.suburb;
+        var lat = venue.location.lat;
+        var lng = venue.location.lng;
+        var name = venue.name;
+        var suburb = fixSuburb(venue.location.city.split(',')[0].trim());
+        var address = fixAddress(venue.location.address) + ', ' + suburb;
 
-        if (place.hasOwnProperty('contact') && place.contact.hasOwnProperty('formattedPhone')) {
-            place.phone = venue.contact.formattedPhone;
+        var phone;
+        if (venue.hasOwnProperty('contact') && venue.contact.hasOwnProperty('formattedPhone')) {
+            phone = venue.contact.formattedPhone;
         }
 
+        var description;
         // create place description from catagories
         if (venue.categories.length > 0) {
-            place.description = venue.categories[0].name;
+            description = venue.categories[0].name;
             if (venue.categories.length > 1) {
                 for (var i = 1; i > venue.categories.length - 1; i++) {
-                    place.description += ', ' + venue.categories[i];
+                    description += ', ' + venue.categories[i];
                 }
-                place.description += ' and ' + venue.categories[venue.categories.length - 1];
+                description += ' and ' + venue.categories[venue.categories.length - 1];
             }
         }
 
-        place.fourSquareUrl = 'https://foursquare.com/v/' + venue.id + '?ref=' + tokens.fourSquareTokens.clientId;
+        var fourSquareUrl = 'https://foursquare.com/v/' + venue.id + '?ref=' + tokens.fourSquareTokens.clientId;
 
-        return place;
+        return new Place(
+            lat, lng, name, suburb, address, null, description,
+            null, description, phone, fourSquareUrl, null, null
+        );
     }
 }
 
@@ -435,8 +456,8 @@ function getYelpPlaces() {
             // and are hard to use with other API results.
             if (business.location.hasOwnProperty('address') && business.location.address.length > 0) {
                 var place = yelpBusToPlace(business);
-                createMarker(place);
-                addInfoWindow(place)
+                place.createMarker();
+                place.addInfoWindow()
                 addPlaceToPlacesObject(place);
             }
         });
@@ -452,38 +473,42 @@ function getYelpPlaces() {
     }
 
     function yelpBusToPlace(business) {
-        var place = {};
-        place.latLng = {
-            lat: business.location.coordinate.latitude,
-            lng: business.location.coordinate.longitude
-        };
-        place.name = business.name;
-        place.suburb = fixSuburb(business.location.city);
-        place.address = fixAddress(business.location.address[0]) + ', ' + place.suburb;
+        var lat = business.location.coordinate.latitude;
+        var lng = business.location.coordinate.longitude;
+        var name = business.name;
+        var suburb = fixSuburb(business.location.city);
+        var address = fixAddress(business.location.address[0]) + ', ' + suburb;
 
+        var image;
+        if (business.hasOwnProperty('image_url')) {
+            image = business.image_url;
+        }
+
+        var description;
         // create place description from catagories
         if (business.categories.length > 0) {
-            place.description = business.categories[0][0];
+            description = business.categories[0][0];
             if (business.categories.length > 1) {
                 for (var i = 1; i > business.categories.length - 1; i++) {
-                    place.description += ', ' + business.categories[i][0];
+                    description += ', ' + business.categories[i][0];
                 }
-                place.description += ' and ' + business.categories[business.categories.length - 1];
+                description += ' and ' + business.categories[business.categories.length - 1];
             }
         }
 
-        if (place.hasOwnProperty('image_url')) {
-            place.image = business.image_url;
-        }
+        var phone = business.phone;
 
+        var yelpSnippet;
         if (business.hasOwnProperty('snippet_text')) {
-            place.yelpSnippet = business.snippet_text;
+            yelpSnippet = business.snippet_text;
         }
 
-        place.yelpUrl = business.url;
-        place.phone = business.phone;
+        var yelpUrl = business.url;
 
-        return place;
+        return new Place(
+            lat, lng, name, suburb, address, image, description,
+            null, phone, null, yelpSnippet, yelpUrl
+        );
     }
 }
 
@@ -513,7 +538,6 @@ return {
     init: init,
     updateLocation: updateLocation,
     closeAllInfoWindows: closeAllInfoWindows,
-    openInfoWindow: openInfoWindow,
 };
 
 });

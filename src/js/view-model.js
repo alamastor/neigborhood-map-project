@@ -187,8 +187,7 @@ define(['knockout', 'require'], function(ko, require) {
 
         self.selectPlace = function(place) {
             console.log(place);
-            var app = require('./app');
-            app.openInfoWindow(place);
+            place.openInfoWindow();
             self.hideNav(true);
         };
 
@@ -197,10 +196,8 @@ define(['knockout', 'require'], function(ko, require) {
             self.places().forEach(function(place) {
                 if (suburbFilter == '' || place.suburb == suburbFilter) {
                     place.marker.show();
-                    //place.marker.setMap(app.map);
                 } else {
                     place.marker.hide();
-                    //place.marker.setMap(null);
                 }
             });
         });
