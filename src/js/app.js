@@ -1,9 +1,34 @@
+/**
+ * Main app module. Responsible for creating the Google Map, making the API calls
+ * to Google Places, Foursquare, and Yelp, and adding the results to the map. Also
+ * loads the view module with RequireJS, and interacts with it - primarily to provide
+ * it with a list of the to places it received from the APIs.
+ */
 define(['jquery', 'google', 'oauthSignature', './tokens', 'mapIcons', './view-model'],
 function($, google, oauthSignature, tokens, mapIcons, viewModel) {
 'use strict';
+// default values for the centre of the search, will be used if
+// values for neigborhoodMapCenterCoords and neigborhoodMapCenterName
+// are not found in the users brower localStorage.
 var DEFAULT_CENTER_LOCATION_COORDS = {lat: -37.8647, lng: 144.9696};
 var DEFAULT_CENTER_LOCATION_NAME = 'St Kilda, Australia';
+
+/**
+ * Global objects for module
+ */
+
+/*
+ * map is the Google Map object and is initialized in createMap.
+ * Accessed by the callbacks from the API requests to add markers
+ * to the map.
+ */
 var map = {};
+
+/**
+ * placesObject stores the the indiviual place objects which are created
+ * from the results of the API calls. Each API call converts its results into
+ * 
+ */
 var placesObject = {};
 
 function init() {
