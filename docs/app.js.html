@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * Main app module. Responsible for creating the Google Map, making the API calls
  * to Google Places, Foursquare, and Yelp, and adding the results to the map. Also
  * loads the view module with RequireJS, and interacts with it - primarily to provide
@@ -93,7 +121,7 @@ Place.prototype.createMarker = function() {
                 strokeColor: '',
                 strokeWeight: 0
             },
-            map_icon_label: '<span class="map-icon map-icon-bicycle-store"></span>',
+            map_icon_label: '&lt;span class="map-icon map-icon-bicycle-store">&lt;/span>',
         });
         var self = this;
         this.marker.addListener('click', function() {
@@ -229,35 +257,35 @@ function closeAllInfoWindows() {
 }
 
 Place.prototype.updateInfoWindowContent = function() {
-    var content = $('<div class="info-window-content"></div>')[0];
-    $('<h3>' + this.name + '</h3>').appendTo(content);
+    var content = $('&lt;div class="info-window-content">&lt;/div>')[0];
+    $('&lt;h3>' + this.name + '&lt;/h3>').appendTo(content);
     if (this.description) {
-        $('<h4 class="info-window-place-description">' + this.description + '</h4>').appendTo(content);
+        $('&lt;h4 class="info-window-place-description">' + this.description + '&lt;/h4>').appendTo(content);
     }
-    var infoWindowBody = $('<div class="info-window-body"></div>').appendTo(content);
-    var infoWindowBodyText = $('<div class="info-window-body-text"></div>').appendTo(infoWindowBody);
-    $('<h5>' + this.address + '</h5>').appendTo(infoWindowBodyText);
+    var infoWindowBody = $('&lt;div class="info-window-body">&lt;/div>').appendTo(content);
+    var infoWindowBodyText = $('&lt;div class="info-window-body-text">&lt;/div>').appendTo(infoWindowBody);
+    $('&lt;h5>' + this.address + '&lt;/h5>').appendTo(infoWindowBodyText);
     if (this.phone) {
-        $('<p>' + this.phone + '</p>').appendTo(infoWindowBodyText);
+        $('&lt;p>' + this.phone + '&lt;/p>').appendTo(infoWindowBodyText);
     }
     if (this.fourSquareUrl) {
-        $('<p><a href=' + this.fourSquareUrl + '><img src="images/Connect-to-Foursquare-150.png"></a></p>').appendTo(infoWindowBodyText);
+        $('&lt;p>&lt;a href=' + this.fourSquareUrl + '>&lt;img src="images/Connect-to-Foursquare-150.png">&lt;/a>&lt;/p>').appendTo(infoWindowBodyText);
     }
     if (this.yelpUrl) {
-        $('<p><a href=' + this.yelpUrl + '><img src="images/yelp_review_btn_dark.png"></a></p>').appendTo(infoWindowBodyText);
+        $('&lt;p>&lt;a href=' + this.yelpUrl + '>&lt;img src="images/yelp_review_btn_dark.png">&lt;/a>&lt;/p>').appendTo(infoWindowBodyText);
     }
     if (this.open_now !== null) {
         if (this.open_now) {
-            $('<p>Now Open!</p>').appendTo(infoWindowBodyText);
+            $('&lt;p>Now Open!&lt;/p>').appendTo(infoWindowBodyText);
         } else {
-            $('<p>Currently Closed</p>').appendTo(infoWindowBodyText);
+            $('&lt;p>Currently Closed&lt;/p>').appendTo(infoWindowBodyText);
         }
     }
     if (this.yelpSnippet) {
-        $('<p>"' + this.yelpSnippet + '"</p>').appendTo(infoWindowBodyText);
+        $('&lt;p>"' + this.yelpSnippet + '"&lt;/p>').appendTo(infoWindowBodyText);
     }
     if (this.image) {
-        $('<div class="info-window-image-container"><img class="info-window-image" src=' + this.image + '></div>').appendTo(infoWindowBody);
+        $('&lt;div class="info-window-image-container">&lt;img class="info-window-image" src=' + this.image + '>&lt;/div>').appendTo(infoWindowBody);
     }
     this.infoWindow.setContent(content);
 };
@@ -280,7 +308,7 @@ function addPlaceToPlacesObject(place) {
             'yelpSnippet',
         ];
         propertiesToCheck.forEach(function(property) {
-            if (place[property] !== null && existingPlace[property] === null) {
+            if (place[property] !== null &amp;&amp; existingPlace[property] === null) {
                 existingPlace[property] = place[property];
             }
             // if connect to google failed, will have no place
@@ -323,7 +351,7 @@ function getGooglePlaces() {
     function gotGooglePlaces(results, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
             console.log(results);
-            for (var i = 0; i < results.length; i++) {
+            for (var i = 0; i &lt; results.length; i++) {
                 var place = googlePlaceToPlace(results[i]);
                 place.createMarker();
                 place.addInfoWindow();
@@ -343,7 +371,7 @@ function getGooglePlaces() {
         var address = fixAddress(googlePlace.vicinity.split(',')[0].trim()) + ', ' + suburb;
 
         var image;
-        if (googlePlace.hasOwnProperty('photos') && googlePlace.photos.length > 0) {
+        if (googlePlace.hasOwnProperty('photos') &amp;&amp; googlePlace.photos.length > 0) {
             image = googlePlace.photos[0].getUrl({
                 maxWidth: 100,
                 maxHeight: 100,
@@ -408,7 +436,7 @@ function getFourSquarePlaces() {
         var address = fixAddress(venue.location.address) + ', ' + suburb;
 
         var phone;
-        if (venue.hasOwnProperty('contact') && venue.contact.hasOwnProperty('formattedPhone')) {
+        if (venue.hasOwnProperty('contact') &amp;&amp; venue.contact.hasOwnProperty('formattedPhone')) {
             phone = venue.contact.formattedPhone;
         }
 
@@ -487,7 +515,7 @@ function getYelpPlaces() {
             // Could determine this from coords, but all results
             // without an address contain very little information,
             // and are hard to use with other API results.
-            if (business.location.hasOwnProperty('address') && business.location.address.length > 0) {
+            if (business.location.hasOwnProperty('address') &amp;&amp; business.location.address.length > 0) {
                 var place = yelpBusToPlace(business);
                 place.createMarker();
                 place.addInfoWindow();
@@ -574,3 +602,26 @@ return {
 };
 
 });
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-app.html">app</a></li></ul><h3>Classes</h3><ul><li><a href="module-app.Place.html">Place</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Apr 27 2016 13:27:11 GMT+1000 (AEST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

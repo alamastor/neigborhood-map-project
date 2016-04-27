@@ -21,6 +21,7 @@
     "map-icons": "^3.0.0",
     "bootstrap": "^3.3.6",
     "requirejs": "^2.2.0",
-    "requirejs-plugins": "^1.0.3"
+    "requirejs-plugins": "^1.0.3",
+    "jsdoc": "^3.4.0"
   }
 }

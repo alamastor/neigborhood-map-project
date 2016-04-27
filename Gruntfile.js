@@ -2,7 +2,7 @@ module.exports = function(grunt) {
     grunt.initConfig({
         clean: {
             dev: {
-                src: 'dist'
+                src: ['dist', 'docs']
             }
         },
         mkdir: {
@@ -59,9 +59,18 @@ module.exports = function(grunt) {
                 }]
             }
         },
+        jsdoc : {
+            dist : {
+                src: ['src/js/*'],
+                options: {
+                    destination: 'docs'
+                }
+            }
+        },
     });
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-mkdir');
     grunt.loadNpmTasks('grunt-contrib-copy');
-    grunt.registerTask('default', ['clean', 'mkdir', 'copy']);
+    grunt.loadNpmTasks('grunt-jsdoc');
+    grunt.registerTask('default', ['clean', 'mkdir', 'copy', 'jsdoc']);
 }
