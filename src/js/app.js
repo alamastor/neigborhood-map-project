@@ -194,6 +194,19 @@ Place.prototype.mergePlace = function(place) {
 };
 
 /**
+ * Generate a long name for a place, based on name and suburb.
+ * @method longName
+ * @memberof module:app.Place#
+ * @param {Place} place - A place to merge into this place.
+ */
+Place.prototype.longName = function() {
+    if (this.suburb) {
+            return this.name + ', ' + this.suburb;
+    }
+    return this.name;
+};
+
+/**
  * Add a place to the Places object with it's address as the property name.
  * If that address is already in the Places object, the two Place objects
  * will be merged together.
@@ -514,7 +527,7 @@ function fourSqrCB(jqXHR) {
         }
     });
     updatePlacesArray();
-    viewModel.foursqrFail(false);
+    viewModel.fourSqrFail(false);
 }
 
 /**
@@ -523,7 +536,7 @@ function fourSqrCB(jqXHR) {
  */
 function fourSqrFailCB() {
     console.log('Foursquare ajax failed');
-    viewModel.foursqrFail(true);
+    viewModel.fourSqrFail(true);
 }
 
 /**
@@ -614,7 +627,7 @@ function getYelpBusinesses() {
  * @param {object} jqXHR - The results object from the jQuery AJAX request.
  */
 function yelpCB(jqXHR) {
-    msg.businesses.forEach(function(business) {
+    jqXHR.businesses.forEach(function(business) {
         // Don't keep results that don't include an address.
         // Could determine this from coords, but all results
         // without an address contain very little information,

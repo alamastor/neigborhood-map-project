@@ -38,7 +38,7 @@
               </div>
               <ul class="dropdown-menu autocomp-menu" data-bind="visible: showAutoCompMenu(), foreach: filteredPlaces">
                 <li class="autocomp-item"
-                    data-bind="text: $parent.longName($data), css: {highlight: $data==$parent.autoCompHighlightItem()}, click: $parent.autoCompSelect, clickBubble: false, event: {mouseover: $parent.setAutoCompHighlight}"
+                    data-bind="text: $data.longName(), css: {highlight: $data==$parent.autoCompHighlightItem()}, click: $parent.autoCompSelect, clickBubble: false, event: {mouseover: $parent.setAutoCompHighlight}"
                   >
                 </li>
               </ul>
@@ -90,7 +90,7 @@
         <img src="images/yelp-logo-medium.png" class="attrib-image">
       </div>
       <div class="api-attrib col-sm-4">
-        <span data-bind="visible: foursqrFail" class="fail-text">Could not connect to Foursquare.</span>
+        <span data-bind="visible: fourSqrFail" class="fail-text">Could not connect to Foursquare.</span>
         <img src="images/Powered-by-Foursquare-one-color-300.png" class="attrib-image">
       </div>
     </div>
