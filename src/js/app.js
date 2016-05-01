@@ -134,7 +134,7 @@ Place.prototype.open = function() {
 
 /**
  * Close the infoWindow of a place, clear its marker highlighting.
- * @method open
+ * @method close
  * @memberof module:app.Place#
  */
 Place.prototype.close = function() {
@@ -144,7 +144,7 @@ Place.prototype.close = function() {
 
 /**
  * Toggle open status of a place
- * @method open
+ * @method toggle
  * @memberof module:app.Place#
  */
 Place.prototype.toggle = function() {
