@@ -1,3 +1,7 @@
+/**
+ * Entry point into app. Uses Require JS to load all dependecies and then
+ * starts app.js. See http://requirejs.org/ for Require JS useage.
+ */
 requirejs.config({
     baseUrl: 'js/lib',
     shim: {
