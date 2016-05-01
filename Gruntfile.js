@@ -56,6 +56,12 @@ module.exports = function(grunt) {
                     cwd: 'bower_components/requirejs-plugins/src',
                     src: ['async.js'],
                     dest: 'dist/js/lib',
+                },
+                {
+                    expand: true,
+                    cwd: 'bower_components/oauth-signature/dist',
+                    src: ['oauth-signature.min.js'],
+                    dest: 'dist/js/lib',
                 }]
             }
         },

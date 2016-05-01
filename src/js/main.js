@@ -18,7 +18,7 @@ define('google', ['async!https://maps.googleapis.com/maps/api/js?libraries=place
     return window.google;
 });
 
-define('oauthSignature', ['oauth-signature'], function() {
+define('oauthSignature', ['oauth-signature.min'], function() {
     return window.oauthSignature;
 });
 
