@@ -123,14 +123,14 @@ Place.prototype.addInfoWindow = function() {
  * @memberof module:app.Place#
  */
 Place.prototype.open = function() {
-    closeAllInfoWindows();
+    closeAllPlaces();
     if (this.hasOwnProperty('marker')) {
         this.infoWindow.open(map, this.marker);
         // Also change marker when info window is opened.
         this.marker.setIcon();
         this.marker.setHighlight();
     }
-}
+};
 
 /**
  * Close the infoWindow of a place, clear its marker highlighting.
@@ -457,18 +457,17 @@ mapIcons.Marker.prototype.clearHighlight = function() {
 };
 
 /**
- * Close all infoWindows.
- * @function closeAllInfoWindows
- * @instance
+ * Close all infoWindows and clear highlights.
+ * @method closeAllPlaces
  */
-var closeAllInfoWindows = exports.closeAllInfoWindows = function() {
+function closeAllPlaces() {
     viewModel.places().forEach(function(place) {
         if (place.hasOwnProperty('infoWindow')) {
             place.infoWindow.close();
-            place.marker.setAnimation(null);
+            place.marker.clearHighlight();
         }
     });
-};
+}
 
 /**
  * API requests
@@ -576,11 +575,11 @@ function getFourSqrVenues() {
  */
 function fourSqrCB(jqXHR) {
     jqXHR.response.venues.forEach(function(venue) {
-        // Don't keep results that don't include an address.
+        // Don't keep results that don't include an address and city.
         // Could determine this from coords, but all results
         // without an address contain very little information
         // and are hard to use with other API results.
-        if (venue.location.hasOwnProperty('address')) {
+        if (venue.location.hasOwnProperty('address') && venue.location.hasOwnProperty('city')) {
             var place = fourSqrVenueToPlace(venue);
             place.createMarker();
             place.addInfoWindow(place);
