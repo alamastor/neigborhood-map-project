@@ -56,7 +56,7 @@ function(         $,     app) {
         });
     }
     requirejs.undef('../app');
-    requirejs(['jquery', '../app', 'google', 'mapIcons'],
+    requirejs(['jquery', '../app'],
     function(         $,     app) {
         // Original function that errored will be called again now
     });

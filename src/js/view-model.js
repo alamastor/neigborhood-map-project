@@ -307,7 +307,7 @@ define(['knockout', 'require'], function(ko, require) {
          * @param {Place} place - The place to select.
          */
         self.selectPlace = function(place) {
-            place.openInfoWindow();
+            place.open();
             self.hideNav(true);
         };
 

@@ -109,20 +109,49 @@ Place.prototype.addInfoWindow = function() {
         this.updateInfoWindowContent();
         var self = this;
         this.marker.addListener('click', function() {
-            self.openInfoWindow();
+            self.toggle();
+        });
+        this.infoWindow.addListener('closeclick', function() {
+            self.marker.clearHighlight();
         });
     }
 };
 
 /**
- * Open the infoWindow of a place, and close all other infoWindows.
- * @method openInfoWindow
+ * Open the infoWindow of a place, change its marker color, and close all other infoWindows.
+ * @method open
  * @memberof module:app.Place#
  */
-Place.prototype.openInfoWindow = function() {
+Place.prototype.open = function() {
     closeAllInfoWindows();
     if (this.hasOwnProperty('marker')) {
         this.infoWindow.open(map, this.marker);
+        // Also change marker when info window is opened.
+        this.marker.setIcon();
+        this.marker.setHighlight();
+    }
+}
+
+/**
+ * Close the infoWindow of a place, clear its marker highlighting.
+ * @method open
+ * @memberof module:app.Place#
+ */
+Place.prototype.close = function() {
+    this.infoWindow.close();
+    this.marker.clearHighlight();
+};
+
+/**
+ * Toggle open status of a place
+ * @method open
+ * @memberof module:app.Place#
+ */
+Place.prototype.toggle = function() {
+    if (!this.infoWindow.map) {
+        this.open();
+    } else {
+        this.close();
     }
 };
 
@@ -279,7 +308,6 @@ function setTextClear() {
 * @function updateLocation
 * @instance
 * @param {object} location - A location object returned from the Google Autocomplete
-* API, API should have been called with types: '(regions)'.
 */
 var updateLocation = exports.updateLocation = function(location) {
     var lat = location.geometry.location.lat();
@@ -401,6 +429,34 @@ mapIcons.Marker.prototype.hide = function() {
 };
 
 /**
+ * Highlight mapIcons.Marker by changing its' color.
+ * @method setHighlight
+ */
+mapIcons.Marker.prototype.setHighlight = function() {
+    this.setIcon({
+        path: mapIcons.MAP_PIN,
+        fillColor: 'midnightblue',
+        fillOpacity: 0.8,
+        strokeColor: '',
+        strokeWeight: 0
+    });
+};
+
+/**
+ * Clear mapIcons.Marker hightlight by changing its color back to normal.
+ * @method clearHighlight
+ */
+mapIcons.Marker.prototype.clearHighlight = function() {
+    this.setIcon({
+        path: mapIcons.MAP_PIN,
+        fillColor: 'darkslategrey',
+        fillOpacity: 0.8,
+        strokeColor: '',
+        strokeWeight: 0
+    });
+};
+
+/**
  * Close all infoWindows.
  * @function closeAllInfoWindows
  * @instance
@@ -409,6 +465,7 @@ var closeAllInfoWindows = exports.closeAllInfoWindows = function() {
     viewModel.places().forEach(function(place) {
         if (place.hasOwnProperty('infoWindow')) {
             place.infoWindow.close();
+            place.marker.setAnimation(null);
         }
     });
 };
@@ -462,7 +519,12 @@ function googlePlaceToPlace(googlePlace) {
     var lat = googlePlace.geometry.location.lat();
     var lng = googlePlace.geometry.location.lng();
     var name = googlePlace.name;
-    var suburb = fixSuburb(googlePlace.vicinity.split(',')[1].trim());
+    var suburb;
+    if (googlePlace.vicinity.indexOf(',') !== -1) {
+        suburb = fixSuburb(googlePlace.vicinity.split(',')[1].trim());
+    } else {
+        suburb = googlePlace.vicinity;
+    }
     var address = fixAddress(googlePlace.vicinity.split(',')[0].trim()) + ', ' + suburb;
 
     var image;
@@ -474,8 +536,7 @@ function googlePlaceToPlace(googlePlace) {
     }
 
     // description is capitalized in css
-    var description = googlePlace.types[0].replace('_', ' ');
-
+    var description = googlePlace.types[0].replace('_', ' '); 
     var open_now;
     if (googlePlace.hasOwnProperty('opening_hours')) {
         open_now = googlePlace.opening_hours.open_now;
@@ -725,5 +786,4 @@ function fixSuburb(suburb) {
 }
 
 return exports;
-
 });
