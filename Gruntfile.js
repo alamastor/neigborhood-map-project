@@ -123,6 +123,18 @@ module.exports = function(grunt) {
                 src: ['package.json', '*.js', 'src/js/*.js']
             }
         },
+        validation: {
+            options: {
+                generateReport: false,
+                reportpath: false,
+                relaxerror: [
+                    'Empty heading.'
+                ]
+            },
+            files: {
+                src: ['src/*.html', 'src/views/*.html']
+            }
+        },
     });
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-mkdir');
@@ -132,6 +144,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-w3c-html-validation');
+
     grunt.registerTask('default', ['clean', 'mkdir', 'copy', 'htmlmin', 'cssmin',  'jsdoc']);
-    grunt.registerTask('validate', ['jshint']);
+    grunt.registerTask('validate', ['jshint', 'validation']);
 };

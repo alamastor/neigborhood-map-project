@@ -19,6 +19,7 @@
     "grunt-contrib-uglify": "^1.0.1",
     "grunt-jsdoc": "^2.0.0",
     "grunt-mkdir": "^1.0.0",
+    "grunt-w3c-html-validation": "^0.1.8",
     "jsdoc": "^3.4.0"
   }
 }
