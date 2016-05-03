@@ -320,7 +320,7 @@ var updateLocation = exports.updateLocation = function(location) {
     // Update view and map to new location
     viewModel.searchLocation(getMapCenterName());
     viewModel.suburbFilter('');
-    map.panTo({lat: lat, lng: lng});
+    viewModel.searchTextFilter(''); map.panTo({lat: lat, lng: lng});
     // Need to delete the markers and infowindows manually,
     // or they stay attached to map after their object is destroyed.
     for(var place in placesObject) {
@@ -731,7 +731,7 @@ function yelpBusToPlace(business) {
 
     var description;
     // create place description from catagories
-    if (business.categories.length > 0) {
+    if (business.hasOwnProperty('catagories') && business.categories.length > 0) {
         description = business.categories[0][0];
         if (business.categories.length > 1) {
             for (var i = 1; i > business.categories.length - 1; i++) {
