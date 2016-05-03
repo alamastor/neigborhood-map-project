@@ -509,6 +509,11 @@ function googlePlacesCBs(results, status) {
             place.addInfoWindow();
             addPlaceToPlacesObject(place);
         });
+        viewModel.googleFail(false);
+    } else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+        // No results
+        console.log('No places results');
+        viewModel.googleFail(false);
     } else {
         viewModel.googleFail(true);
     }
