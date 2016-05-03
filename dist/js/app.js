@@ -414,6 +414,7 @@ function addAutocomplete() {
     }
 }
 
+if (mapIcons.load !== 'fail') {
 /**
  * Show method for the mapIcons.Marker.
  * @method show
@@ -457,6 +458,9 @@ mapIcons.Marker.prototype.clearHighlight = function() {
         strokeWeight: 0
     });
 };
+
+}
+
 
 /**
  * Close all infoWindows and clear highlights.
