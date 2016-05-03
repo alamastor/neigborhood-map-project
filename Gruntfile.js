@@ -74,10 +74,46 @@ module.exports = function(grunt) {
                 }
             }
         },
+        htmlmin: {
+            dev: {
+                options: {
+                    collapseWhiteSpace: true,
+                },
+                files: [{
+                    expand: true,
+                    cwd: 'dist',
+                    src: 'index.html',
+                    dest: 'dist'
+                }]
+            }
+        },
+        cssmin: {
+          target: {
+            files: [{
+              expand: true,
+              cwd: 'dist/css',
+              src: ['*.css'],
+              dest: 'dist/css',
+            }]
+          }
+        },
+        uglify: {
+            target: {
+                files: [{
+                    expand: true,
+                    cwd: 'dist/js',
+                    src: ['*.js'],
+                    dest: 'dist/js',
+                }]
+            }
+        },
     });
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-mkdir');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-jsdoc');
-    grunt.registerTask('default', ['clean', 'mkdir', 'copy', 'jsdoc']);
+    grunt.loadNpmTasks('grunt-contrib-htmlmin');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.registerTask('default', ['clean', 'mkdir', 'copy', 'htmlmin', 'cssmin', 'uglify', 'jsdoc']);
 }
