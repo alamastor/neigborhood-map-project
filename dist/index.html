@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Local Bike Shops</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta charset="utf-8">
+  <link href="lib/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Quattrocento+Sans|Yesteryear" rel="stylesheet" type="text/css">
+  <link href="css/style.css" rel="stylesheet">
+  <link href="lib/css/map-icons.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="images/favicon.ico">
+</head>
+<body>
+  <!-- Nav Bar -->
+  <nav class="navbar navbar-default" id="header-nav">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-bind="click: toggleNav">
+          <span class="sr-only"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <!-- Nav Header -->
+        <div id="header-text" class="navbar-brand">
+          <h1 id="header-text-main">Local Bike Shops</h1>
+          <h2 id="header-text-loc" data-bind="text: searchLocation"></h2>
+        </div>
+      </div>
+
+      <div class="collapse navbar-collapse responsive-collapse" data-bind="css: {collapse: hideNav}">
+        <!-- Search Form -->
+        <form class="navbar-form navbar-left" role="search" autocomplete="off" data-bind="submit: searchSubmit">
+          <div class="form-group dropdown">
+              <div class="use-pointer-events">
+              <input type="text" class="form-control hasclear" placeholder="Search" data-bind="textInput: searchTextFilter, event: {keydown: inputKeyPress}">
+              <span class="clearer glyphicon glyphicon-remove-circle form-control-feedback"></span>
+              </div>
+              <ul class="dropdown-menu autocomp-menu" data-bind="visible: showAutoCompMenu(), foreach: filteredPlaces">
+                <li class="autocomp-item" data-bind="text: $data.longName(), css: {highlight: $data==$parent.autoCompHighlightItem()}, click: $parent.autoCompSelect, clickBubble: false, event: {mouseover: $parent.setAutoCompHighlight}">
+                </li>
+              </ul>
+          </div>
+          <button type="submit" class="btn btn-default">Submit</button>
+        </form>
+        <!-- Suburbs Menu -->
+        <div class="dropdown navbar-left">
+          <button class="btn btn-default navbar-btn dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true">
+            Select Suburb
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li class="suburb" data-bind="click: setSuburbFilter('')"><b>All Suburbs</b></li>
+            <!-- ko foreach:  uniqueSuburbs -->
+              <li class="suburb" data-bind="text: $data, click: $parent.setSuburbFilter"></li>
+            <!-- /ko -->
+          </ul>
+        </div>
+        <!-- Location Input -->
+        <input type="text" class="form-control navbar-form navbar-right" id="location-input" placeholder="Your Location" data-bind="textInput: locationInput">
+        <!-- Mobile Place list -->
+        <ul id="nav-places" class="visible-xs" data-bind="foreach: filteredPlaces">
+          <li class="nav-place" data-bind="click: $parent.selectPlace">
+            <p class="place-name" data-bind="text: $data.name"></p>
+            <p class="place-suburb" data-bind="text: $data.suburb"></p>
+          </li>
+        </ul>
+      </div><!--collapse navbar-collapse-->
+    </div><!--container-fluid-->
+  </nav>
+
+  <main>
+    <!-- Main Places List -->
+    <ul id="places" class="hidden-xs" data-bind="foreach: filteredPlaces">
+      <li class="place" data-bind="click: $parent.selectPlace">
+        <p class="place-name" data-bind="text: $data.name"></p>
+        <p class="place-suburb" data-bind="text: $data.suburb"></p>
+      </li>
+    </ul>
+    <!-- Google Map -->
+    <div id="map"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="container-fluid">
+    <div id="attrib" class="row">
+      <div class="api-attrib col-sm-4">
+        <span data-bind="visible: googleFail" class="fail-text">Could not connect to Google.</span>
+        <img src="images/powered_by_google_on_white.png">
+      </div>
+      <div class="api-attrib col-sm-4">
+        <span data-bind="visible: yelpFail" class="fail-text">Could not connect to Yelp.</span>
+        <img src="images/yelp-logo-medium.png" class="attrib-image">
+      </div>
+      <div class="api-attrib col-sm-4">
+        <span data-bind="visible: fourSqrFail" class="fail-text">Could not connect to Foursquare.</span>
+        <img src="images/Powered-by-Foursquare-one-color-300.png" class="attrib-image">
+      </div>
+    </div>
+  </footer>
+
+  <!-- JS Loader -->
+  <script data-main="js/main" src="js/lib/require.js"></script>
+</body>
+</html>
