@@ -15,6 +15,7 @@
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-cssmin": "^1.0.1",
     "grunt-contrib-htmlmin": "^1.4.0",
+    "grunt-contrib-jshint": "^1.0.0",
     "grunt-contrib-uglify": "^1.0.1",
     "grunt-jsdoc": "^2.0.0",
     "grunt-mkdir": "^1.0.0",

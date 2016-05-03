@@ -107,6 +107,22 @@ module.exports = function(grunt) {
                 }]
             }
         },
+        jshint: {
+            options: {
+                curly: true,
+                eqnull: true,
+                eqeqeq: true,
+                devel: true,
+                globals: {
+                    require: true,
+                    module: true,
+                    jQuery: true,
+                }
+            },
+            files: {
+                src: ['package.json', '*.js', 'src/js/*.js']
+            }
+        },
     });
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-mkdir');
@@ -115,5 +131,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.registerTask('default', ['clean', 'mkdir', 'copy', 'htmlmin', 'cssmin', 'uglify', 'jsdoc']);
-}
+    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.registerTask('default', ['clean', 'mkdir', 'copy', 'htmlmin', 'cssmin',  'jsdoc']);
+    grunt.registerTask('validate', ['jshint']);
+};

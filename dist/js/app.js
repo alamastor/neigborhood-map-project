@@ -1,1 +1,790 @@
-define(["jquery","google","oauthSignature","./tokens","mapIcons","./view-model"],function(a,b,c,d,e,f){"use strict";function g(a,b,c,d,e,f,g,h,i,j,k,l){this.latLng={lat:a,lng:b},this.name=c,this.suburb=d,this.address=e,this.image=f,this.description=g,this.open_now=h,this.phone=i,this.fourSquareUrl=j,this.yelpSnippet=k,this.yelpUrl=l}function h(a){H.hasOwnProperty(a.address.toLowerCase())?H[a.address.toLowerCase()].mergePlace(a):H[a.address.toLowerCase()]=a}function i(){f.places([]);for(var a in H)H.hasOwnProperty(a)&&f.places.push(H[a])}function j(){a(".hasclear").keyup(function(){var b=a(this);b.next("span").toggle(Boolean(b.val()))}),a(".clearer").hide(a(this).prev("input").val()),a(".clearer").click(function(){f.searchTextFilter(""),a(this).prev("input").focus(),a(this).hide()})}function k(a,b){localStorage.setItem("neigborhoodMapCenterCoords",JSON.stringify(a)),localStorage.setItem("neigborhoodMapCenterName",b)}function l(){return localStorage.hasOwnProperty("neigborhoodMapCenterCoords")?JSON.parse(localStorage.neigborhoodMapCenterCoords):E}function m(){return localStorage.neigborhoodMapCenterName||F}function n(){var a=l(),c=m();f.searchLocation(c),"fail"!=b.load?(G=new b.maps.Map(document.getElementById("map"),{center:a,scrollwheel:!0,zoom:14,mapTypeId:b.maps.MapTypeId.TERRAIN}),f.googleFail(!1)):f.googleFail(!0)}function o(){if("fail"!=b.load){var c=a("#location-input")[0],d=new b.maps.places.Autocomplete(c,{types:["(regions)"]});d.addListener("place_changed",function(){var a=d.getPlace();I(a),f.locationInput("")})}}function p(){f.places().forEach(function(a){a.hasOwnProperty("infoWindow")&&(a.infoWindow.close(),a.marker.clearHighlight())})}function q(){"fail"!==b.load&&new b.maps.places.PlacesService(G).nearbySearch({location:new b.maps.LatLng(l().lat,l().lng),radius:3e3,type:"bicycle_store"},r)}function r(a,c){c==b.maps.places.PlacesServiceStatus.OK?a.forEach(function(a){var b=s(a);b.createMarker(),b.addInfoWindow(),h(b)}):f.googleFail(!0),i()}function s(a){var b,c=a.geometry.location.lat(),d=a.geometry.location.lng(),e=a.name;b=-1!==a.vicinity.indexOf(",")?C(a.vicinity.split(",")[1].trim()):a.vicinity;var f,h=B(a.vicinity.split(",")[0].trim())+", "+b;a.hasOwnProperty("photos")&&a.photos.length>0&&(f=a.photos[0].getUrl({maxWidth:100,maxHeight:100}));var i,j=a.types[0].replace("_"," ");return a.hasOwnProperty("opening_hours")&&(i=a.opening_hours.open_now),new g(c,d,e,b,h,f,j,i,null,null,null,null)}function t(){var b=a.ajax("https://api.foursquare.com/v2/venues/search",{dataType:"json",data:{client_id:d.fourSquareTokens.clientId,client_secret:d.fourSquareTokens.clientSecret,ll:l().lat.toString()+","+l().lng.toString(),query:"bicycle",v:20160310}});b.done(u),b.fail(v)}function u(a){a.response.venues.forEach(function(a){if(a.location.hasOwnProperty("address")&&a.location.hasOwnProperty("city")){var b=w(a);b.createMarker(),b.addInfoWindow(b),h(b)}}),i(),f.fourSqrFail(!1)}function v(){console.log("Foursquare ajax failed"),f.fourSqrFail(!0)}function w(a){var b,c=a.location.lat,e=a.location.lng,f=a.name,h=C(a.location.city.split(",")[0].trim()),i=B(a.location.address)+", "+h;a.hasOwnProperty("contact")&&a.contact.hasOwnProperty("formattedPhone")&&(b=a.contact.formattedPhone);var j;if(a.categories.length>0&&(j=a.categories[0].name,a.categories.length>1)){for(var k=1;k>a.categories.length-1;k++)j+=", "+a.categories[k];j+=" and "+a.categories[a.categories.length-1]}var l="https://foursquare.com/v/"+a.id+"?ref="+d.fourSquareTokens.clientId;return new g(c,e,f,h,i,null,j,null,b,l,null,null)}function x(){var b="https://api.yelp.com/v2/search",e={oauth_consumer_key:d.yelpTokens.consumerKey,oauth_token:d.yelpTokens.token,oauth_nonce:Math.floor(1e12*Math.random()).toString(),oauth_timestamp:Math.floor(Date.now()/1e3),oauth_signature_method:"HMAC-SHA1",oauth_version:"1.0",term:"bicycle_store",cll:l().lat.toString()+","+l().lng.toString(),location:m(),callback:"cb"};e.oauth_signature=c.generate("GET",b,e,d.yelpTokens.consumerSecret,d.yelpTokens.tokenSecret);var f=a.ajax({url:b,data:e,cache:!0,dataType:"jsonp"});f.done(y),f.fail(z)}function y(a){a.businesses.forEach(function(a){if(a.location.hasOwnProperty("address")&&a.location.address.length>0){var b=A(a);b.createMarker(),b.addInfoWindow(),h(b)}}),i(),f.yelpFail(!1)}function z(){console.log("yelp ajax failed"),f.yelpFail(!0)}function A(a){var b,c=a.location.coordinate.latitude,d=a.location.coordinate.longitude,e=a.name,f=C(a.location.city),h=B(a.location.address[0])+", "+f;a.hasOwnProperty("image_url")&&(b=a.image_url);var i;if(a.hasOwnProperty("catagories")&&a.categories.length>0&&(i=a.categories[0][0],a.categories.length>1)){for(var j=1;j>a.categories.length-1;j++)i+=", "+a.categories[j][0];i+=" and "+a.categories[a.categories.length-1]}var k,l=a.phone;a.hasOwnProperty("snippet_text")&&(k=a.snippet_text);var m=a.url;return new g(c,d,e,f,h,b,i,null,l,null,k,m)}function B(a){return a=a.replace(".",""),a=a.replace(/St$/,"Street"),a=a.replace(/Rd$/,"Road")}function C(a){return a=a.replace(".",""),a=a.replace("St","Saint")}var D={},E={lat:-37.8647,lng:144.9696},F="St Kilda, Australia",G={},H={};g.prototype.createMarker=function(){"fail"!=e.load&&(this.marker=new e.Marker({position:this.latLng,map:G,icon:{path:e.MAP_PIN,fillColor:"darkslategrey",fillOpacity:.8,strokeColor:"",strokeWeight:0},map_icon_label:'<span class="map-icon map-icon-bicycle-store"></span>'}))},g.prototype.addInfoWindow=function(){if("fail"!=e.load){this.infoWindow=new b.maps.InfoWindow,this.updateInfoWindowContent();var a=this;this.marker.addListener("click",function(){a.toggle()}),this.infoWindow.addListener("closeclick",function(){a.marker.clearHighlight()})}},g.prototype.open=function(){p(),this.hasOwnProperty("marker")&&(this.infoWindow.open(G,this.marker),this.marker.setIcon(),this.marker.setHighlight())},g.prototype.close=function(){this.infoWindow.close(),this.marker.clearHighlight()},g.prototype.toggle=function(){this.infoWindow.map?this.close():this.open()},g.prototype.updateInfoWindowContent=function(){var b=a('<div class="info-window-content"></div>')[0];a("<h3>"+this.name+"</h3>").appendTo(b),this.description&&a('<h4 class="info-window-place-description">'+this.description+"</h4>").appendTo(b);var c=a('<div class="info-window-body"></div>').appendTo(b),d=a('<div class="info-window-body-text"></div>').appendTo(c);a("<h5>"+this.address+"</h5>").appendTo(d),this.phone&&a("<p>"+this.phone+"</p>").appendTo(d),this.fourSquareUrl&&a("<p><a href="+this.fourSquareUrl+'><img src="images/Connect-to-Foursquare-150.png"></a></p>').appendTo(d),this.yelpUrl&&a("<p><a href="+this.yelpUrl+'><img src="images/yelp_review_btn_dark.png"></a></p>').appendTo(d),null!==this.open_now&&(this.open_now?a("<p>Now Open!</p>").appendTo(d):a("<p>Currently Closed</p>").appendTo(d)),this.yelpSnippet&&a('<p>"'+this.yelpSnippet+'"</p>').appendTo(d),this.image&&a('<div class="info-window-image-container"><img class="info-window-image" src='+this.image+"></div>").appendTo(c),this.infoWindow.setContent(b)},g.prototype.mergePlace=function(a){for(var b in this)this.hasOwnProperty(b)&&(null!==a[b]&&null===this[b]&&(this[b]=a[b]),this.hasOwnProperty("infoWindow")&&this.updateInfoWindowContent(this),a.hasOwnProperty("marker")&&a.marker.setMap(null))},g.prototype.longName=function(){return this.suburb?this.name+", "+this.suburb:this.name};var I=(D.init=function(){j(),n(),o(),q(),t(),x()},D.updateLocation=function(a){var b=a.geometry.location.lat(),c=a.geometry.location.lng(),d=a.formatted_address;k({lat:b,lng:c},d),f.searchLocation(m()),f.suburbFilter(""),f.searchTextFilter(""),G.panTo({lat:b,lng:c});for(var e in H)H.hasOwnProperty(e)&&(H[e].marker.setMap(null),delete H[e].infoWindow);H={},q(),t(),x()});return e.Marker.prototype.show=function(){this.setMap(G)},e.Marker.prototype.hide=function(){this.setMap(null)},e.Marker.prototype.setHighlight=function(){this.setIcon({path:e.MAP_PIN,fillColor:"midnightblue",fillOpacity:.8,strokeColor:"",strokeWeight:0})},e.Marker.prototype.clearHighlight=function(){this.setIcon({path:e.MAP_PIN,fillColor:"darkslategrey",fillOpacity:.8,strokeColor:"",strokeWeight:0})},D});
+/**
+ * Main app module. Responsible for creating the Google Map, making the API calls
+ * to Google Places, Foursquare, and Yelp, and adding the results to the map. Also
+ * loads the view module with RequireJS, and interacts with it - primarily to provide
+ * it with a list of the to places it received from the APIs.
+ * @module
+ */
+define(['jquery', 'google', 'oauthSignature', './tokens', 'mapIcons', './view-model'],
+function($, google, oauthSignature, tokens, mapIcons, viewModel) {
+'use strict';
+var exports = {};
+// default values for the centre of the search, will be used if
+// values for neigborhoodMapCenterCoords and neigborhoodMapCenterName
+// are not found in the users brower localStorage.
+var DEFAULT_CENTER_LOCATION_COORDS = {lat: -37.8647, lng: 144.9696};
+var DEFAULT_CENTER_LOCATION_NAME = 'St Kilda, Australia';
+
+/**
+ * Global objects for module
+ */
+
+/*
+ * map is the Google Map object and is initialized in createMap.
+ * Accessed by the callbacks from the API requests to add markers
+ * to the map.
+ */
+var map = {};
+
+/**
+ * placesObject stores the the indiviual Place objects which are created
+ * from the results of the API calls. Each API call converts its results into
+ * a Place which is added to this object this is address as the property name.
+ * This allows Place objects to be easily combined with another place from a different
+ * API which has the same address. This object is then converted to and array for
+ * use by the viewModel.
+ */
+var placesObject = {};
+
+/**
+ * Represents the results from one or more APIs. Essentially just a vanilla object
+ * with its properties specified as parameters for more explicit code.
+ * @class Place
+ * @memberof module:app
+ * @param {number} lat - The latitude of the place.
+ * @param {number} lng - The longitude of the place.
+ * @param {string} name - The name of the place.
+ * @param {string} suburb - The suburb / city of the place.
+ * @param {string} address - The address of the place.
+ * @param {string} image - This URL of an image of the place.
+ * @param {string} description - The type of place this is eg. Bike Shop.
+ * @param {boolean} open_now - Open / closed status of the place at time of API call.
+ * @param {string} phone - The phone number of the place
+ * @param {string} fourSquareUrl - URL of Foursquare page for this place.
+ * @param {string} yelpSnippet - A review snippent from the Yelp API results.
+ * @param {string} yelpUrl - A URL of the Yelp page for this place.
+ */
+function Place(
+    lat, lng, name, suburb, address, image, description,
+    open_now, phone, fourSquareUrl, yelpSnippet, yelpUrl
+) {
+    this.latLng = {lat: lat, lng: lng};
+    this.name = name;
+    this.suburb = suburb;
+    this.address = address;
+    this.image = image;
+    this.description = description;
+    this.open_now = open_now;
+    this.phone = phone;
+    this.fourSquareUrl = fourSquareUrl;
+    this.yelpSnippet = yelpSnippet;
+    this.yelpUrl = yelpUrl;
+}
+
+/**
+ * Create a marker on the Google Map at the location of the Place and
+ * add the marker to the place as a propertyit to the Place. These
+ * markers are styled Google Maps marker from
+ * {@link http://map-icons.com map-icons.com}.
+ * @method createMarker
+ * @memberof module:app.Place#
+ */
+Place.prototype.createMarker = function() {
+    if (mapIcons.load !== 'fail') {
+        this.marker = new mapIcons.Marker({
+            position: this.latLng,
+            map: map,
+            icon: {
+                path: mapIcons.MAP_PIN,
+                fillColor: 'darkslategrey',
+                fillOpacity: 0.8,
+                strokeColor: '',
+                strokeWeight: 0
+            },
+            map_icon_label: '<span class="map-icon map-icon-bicycle-store"></span>',
+        });
+    }
+};
+
+/**
+ * Adds an infoWindow a Place, set it's content, and add a listener to the
+ * Place's marker to open the infoWindow on click.
+ * @method addInfoWindow
+ * @memberof module:app.Place#
+ */
+Place.prototype.addInfoWindow = function() {
+    // If mapIcons failed to load Marker will not exist so don't add infoWindow
+    if (mapIcons.load !== 'fail') {
+        this.infoWindow = new google.maps.InfoWindow();
+        this.updateInfoWindowContent();
+        var self = this;
+        this.marker.addListener('click', function() {
+            self.toggle();
+        });
+        this.infoWindow.addListener('closeclick', function() {
+            self.marker.clearHighlight();
+        });
+    }
+};
+
+/**
+ * Open the infoWindow of a place, change its marker color, and close all other infoWindows.
+ * @method open
+ * @memberof module:app.Place#
+ */
+Place.prototype.open = function() {
+    closeAllPlaces();
+    if (this.hasOwnProperty('marker')) {
+        this.infoWindow.open(map, this.marker);
+        // Also change marker when info window is opened.
+        this.marker.setIcon();
+        this.marker.setHighlight();
+    }
+};
+
+/**
+ * Close the infoWindow of a place, clear its marker highlighting.
+ * @method close
+ * @memberof module:app.Place#
+ */
+Place.prototype.close = function() {
+    this.infoWindow.close();
+    this.marker.clearHighlight();
+};
+
+/**
+ * Toggle open status of a place
+ * @method toggle
+ * @memberof module:app.Place#
+ */
+Place.prototype.toggle = function() {
+    if (!this.infoWindow.map) {
+        this.open();
+    } else {
+        this.close();
+    }
+};
+
+/**
+ * Update the content of a Places infoWindow, based on the places properties.
+ * @method updateInfoWindowContent
+ * @memberof module:app.Place#
+ */
+Place.prototype.updateInfoWindowContent = function() {
+    var content = $('<div class="info-window-content"></div>')[0];
+    $('<h3>' + this.name + '</h3>').appendTo(content);
+    if (this.description) {
+        $('<h4 class="info-window-place-description">' + this.description + '</h4>').appendTo(content);
+    }
+    var infoWindowBody = $('<div class="info-window-body"></div>').appendTo(content);
+    var infoWindowBodyText = $('<div class="info-window-body-text"></div>').appendTo(infoWindowBody);
+    $('<h5>' + this.address + '</h5>').appendTo(infoWindowBodyText);
+    if (this.phone) {
+        $('<p>' + this.phone + '</p>').appendTo(infoWindowBodyText);
+    }
+    if (this.fourSquareUrl) {
+        $('<p><a href=' + this.fourSquareUrl + '><img src="images/Connect-to-Foursquare-150.png"></a></p>').appendTo(infoWindowBodyText);
+    }
+    if (this.yelpUrl) {
+        $('<p><a href=' + this.yelpUrl + '><img src="images/yelp_review_btn_dark.png"></a></p>').appendTo(infoWindowBodyText);
+    }
+
+    // open_now is boolean, so need to check for null the truthiness.
+    if (this.open_now !== null) {
+        if (this.open_now) {
+            $('<p>Now Open!</p>').appendTo(infoWindowBodyText);
+        } else {
+            $('<p>Currently Closed</p>').appendTo(infoWindowBodyText);
+        }
+    }
+    if (this.yelpSnippet) {
+        $('<p>"' + this.yelpSnippet + '"</p>').appendTo(infoWindowBodyText);
+    }
+    if (this.image) {
+        $('<div class="info-window-image-container"><img class="info-window-image" src=' + this.image + '></div>').appendTo(infoWindowBody);
+    }
+
+    this.infoWindow.setContent(content);
+};
+
+/**
+ * Merge another Place into this Place, replacing all missing properties in this
+ * Place with properties from the other Place, if present. Should be used to merge
+ * results from different APIs for the same shop together.
+ * @method mergePlace
+ * @memberof module:app.Place#
+ * @param {Place} place - A place to merge into this place.
+ */
+Place.prototype.mergePlace = function(place) {
+    for (var property in this) {
+        if (this.hasOwnProperty(property)) {
+            if (place[property] !== null && this[property] === null) {
+                this[property] = place[property];
+            }
+            // if connect to google failed, will have no place
+            if (this.hasOwnProperty('infoWindow')) {
+                this.updateInfoWindowContent(this);
+            }
+            if (place.hasOwnProperty('marker')) {
+                place.marker.setMap(null);
+            }
+        }
+    }
+};
+
+/**
+ * Generate a long name for a place, based on name and suburb.
+ * @method longName
+ * @memberof module:app.Place#
+ * @param {Place} place - A place to merge into this place.
+ */
+Place.prototype.longName = function() {
+    if (this.suburb) {
+            return this.name + ', ' + this.suburb;
+    }
+    return this.name;
+};
+
+/**
+ * Add a place to the Places object with it's address as the property name.
+ * If that address is already in the Places object, the two Place objects
+ * will be merged together.
+ * @param {object} place - A place to add to the places object.
+ */
+function addPlaceToPlacesObject(place) {
+    if (!placesObject.hasOwnProperty(place.address.toLowerCase())) {
+        placesObject[place.address.toLowerCase()] = place;
+    } else {
+        // Place is already in object just add properties it doesn't already have
+        placesObject[place.address.toLowerCase()].mergePlace(place);
+    }
+}
+
+/**
+ * Update the viewModels placesArray from the places object.
+ * @function setTextClear
+ */
+function updatePlacesArray() {
+    viewModel.places([]);
+    for (var place in placesObject) {
+        if (placesObject.hasOwnProperty(place)) {
+            viewModel.places.push(placesObject[place]);
+        }
+    }
+}
+
+/**
+ * Call to start the app. Sets up extra Javascript listeners on the
+ * page not managed by Knockout, creates the Google Map, and make the API
+ * requests.
+ * @function init
+ * @instance
+ */
+var init = exports.init = function() {
+    setTextClear();
+    createMap();
+    addAutocomplete();
+    getGooglePlaces();
+    getFourSqrVenues();
+    getYelpBusinesses();
+};
+
+/**
+ * Add cross to text input fields with class hasclear
+ * which will clear text in the input when clicked.
+ * Based on {@link http://www.bootply.com/130682}.
+ * @function setTextClear
+ */
+function setTextClear() {
+    $(".hasclear").keyup(function () {
+        var t = $(this);
+        t.next('span').toggle(Boolean(t.val()));
+    });
+
+    $(".clearer").hide(function() {
+        $(this).prev('input').val();
+    });
+
+    $(".clearer").click(function () {
+        viewModel.searchTextFilter('');
+        $(this).prev('input').focus();
+        $(this).hide();
+    });
+}
+
+/**
+* Update the center location of the Map and API requests. Saves the
+* new location in localStorage as the new default location, causes the
+* map to recenter on the new location, and issues new API requests for
+* the new location.
+* @function updateLocation
+* @instance
+* @param {object} location - A location object returned from the Google Autocomplete
+*/
+var updateLocation = exports.updateLocation = function(location) {
+    var lat = location.geometry.location.lat();
+    var lng = location.geometry.location.lng();
+    var placeName = location.formatted_address;
+
+    // Save location to localStorage, it will now be default location for user.
+    setLocalStorageMapCenter({lat: lat, lng: lng}, placeName);
+
+    // Update view and map to new location
+    viewModel.searchLocation(getMapCenterName());
+    viewModel.suburbFilter('');
+    viewModel.searchTextFilter(''); map.panTo({lat: lat, lng: lng});
+    // Need to delete the markers and infowindows manually,
+    // or they stay attached to map after their object is destroyed.
+    for(var place in placesObject) {
+        if (placesObject.hasOwnProperty(place)) {
+            placesObject[place].marker.setMap(null);
+            delete placesObject[place].infoWindow;
+        }
+    }
+
+    // Make fresh API calls for new location
+    placesObject = {};
+    getGooglePlaces();
+    getFourSqrVenues();
+    getYelpBusinesses();
+};
+
+/**
+ * Set a location in localStorage, this will be the default location for user
+ * until updated.
+ * @function setLocalStorageMapCenter
+ * @param {object} coords - An object containing Lat and Lng properties.
+ * @param {string} name - The name of location; will be displayed at the top of page.
+ */
+function setLocalStorageMapCenter(coords, name) {
+    localStorage.setItem('neigborhoodMapCenterCoords', JSON.stringify(coords));
+    localStorage.setItem('neigborhoodMapCenterName', name);
+}
+
+/**
+ * Returns the map center coords from localStorage, or return default value if none saved.
+ * @function getMapCenterCoords
+ * @return {object} Object containing lat and lng properties.
+ */
+function getMapCenterCoords() {
+    if (localStorage.hasOwnProperty('neigborhoodMapCenterCoords')) {
+        return JSON.parse(localStorage.neigborhoodMapCenterCoords);
+    } else {
+        return DEFAULT_CENTER_LOCATION_COORDS;
+    }
+}
+
+/**
+ * Returns the map center name from localStorage, or return default value if none saved.
+ * @function getMapCenterName
+ * @return {string} Name of the map center location.
+ */
+function getMapCenterName() {
+    return localStorage.neigborhoodMapCenterName || DEFAULT_CENTER_LOCATION_NAME;
+}
+
+
+/**
+ * Creates the Google Map, and centers it based on the stored center location.
+ * @function createMap
+ */
+function createMap() {
+    // Create a map object and specify the DOM element for display.
+    var centerLocationCoords = getMapCenterCoords();
+    var centerLocationName = getMapCenterName();
+    viewModel.searchLocation(centerLocationName);
+    if (google.load !== 'fail') {
+        map = new google.maps.Map(document.getElementById('map'), {
+            center: centerLocationCoords,
+            scrollwheel: true,
+            zoom: 14,
+            mapTypeId: google.maps.MapTypeId.TERRAIN,
+        });
+        viewModel.googleFail(false);
+    } else {
+        // google maps load fail app cannot run, show fail text
+        viewModel.googleFail(true);
+    }
+}
+
+/**
+ * Adds and Google autocomplete api to the the new location input.
+ * @function
+ */
+function addAutocomplete() {
+    if (google.load !== 'fail') {
+        var locationInput = $('#location-input')[0];
+        // Setup Autocomplete, with the regions parameter set.
+        var autocomplete = new google.maps.places.Autocomplete(locationInput, {types: ['(regions)']});
+        autocomplete.addListener('place_changed', function() {
+            var place = autocomplete.getPlace();
+            updateLocation(place);
+            viewModel.locationInput('');
+        });
+    }
+}
+
+/**
+ * Show method for the mapIcons.Marker.
+ * @method show
+ */
+mapIcons.Marker.prototype.show = function() {
+    this.setMap(map);
+};
+
+/**
+ * Hide method for the mapIcons.Marker.
+ * @method hide
+ */
+mapIcons.Marker.prototype.hide = function() {
+    this.setMap(null);
+};
+
+/**
+ * Highlight mapIcons.Marker by changing its' color.
+ * @method setHighlight
+ */
+mapIcons.Marker.prototype.setHighlight = function() {
+    this.setIcon({
+        path: mapIcons.MAP_PIN,
+        fillColor: 'midnightblue',
+        fillOpacity: 0.8,
+        strokeColor: '',
+        strokeWeight: 0
+    });
+};
+
+/**
+ * Clear mapIcons.Marker hightlight by changing its color back to normal.
+ * @method clearHighlight
+ */
+mapIcons.Marker.prototype.clearHighlight = function() {
+    this.setIcon({
+        path: mapIcons.MAP_PIN,
+        fillColor: 'darkslategrey',
+        fillOpacity: 0.8,
+        strokeColor: '',
+        strokeWeight: 0
+    });
+};
+
+/**
+ * Close all infoWindows and clear highlights.
+ * @method closeAllPlaces
+ */
+function closeAllPlaces() {
+    viewModel.places().forEach(function(place) {
+        if (place.hasOwnProperty('infoWindow')) {
+            place.infoWindow.close();
+            place.marker.clearHighlight();
+        }
+    });
+}
+
+/**
+ * API requests
+ */
+
+/**
+ * Make Google Places API request for bike shops near the users selected location.
+ * @function getGooglePlaces
+ */
+function getGooglePlaces() {
+    if (google.load !== 'fail') {
+        new google.maps.places.PlacesService(map).nearbySearch({
+            location: new google.maps.LatLng(getMapCenterCoords().lat, getMapCenterCoords().lng),
+            radius: 3000,
+            type: 'bicycle_store',
+        }, googlePlacesCBs);
+    }
+}
+
+/**
+ * Callback function from request made by getGooglePlaces. For each place in results
+ * create Place, setup marker and infoWindow. Finally, update viewModel.placesArray
+ * from placesObject.
+ * @function googlePlacesCBs
+ * @param {array} results - The results from the Google Places API.
+ * @param {string} status - The status of the Google Places API results.
+ */
+function googlePlacesCBs(results, status) {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
+        results.forEach(function(result) {
+            var place = googlePlaceToPlace(result);
+            place.createMarker();
+            place.addInfoWindow();
+            addPlaceToPlacesObject(place);
+        });
+    } else {
+        viewModel.googleFail(true);
+    }
+    updatePlacesArray();
+}
+
+/**
+ * Convert result from Google Places API to a Place object.
+ * function googlePlaceToPlace
+ * @param {object} googlePlace - Single result object from Google Places API.
+ */
+function googlePlaceToPlace(googlePlace) {
+    var lat = googlePlace.geometry.location.lat();
+    var lng = googlePlace.geometry.location.lng();
+    var name = googlePlace.name;
+    var suburb;
+    if (googlePlace.vicinity.indexOf(',') !== -1) {
+        suburb = fixSuburb(googlePlace.vicinity.split(',')[1].trim());
+    } else {
+        suburb = googlePlace.vicinity;
+    }
+    var address = fixAddress(googlePlace.vicinity.split(',')[0].trim()) + ', ' + suburb;
+
+    var image;
+    if (googlePlace.hasOwnProperty('photos') && googlePlace.photos.length > 0) {
+        image = googlePlace.photos[0].getUrl({
+            maxWidth: 100,
+            maxHeight: 100,
+        });
+    }
+
+    // description is capitalized in css
+    var description = googlePlace.types[0].replace('_', ' '); 
+    var open_now;
+    if (googlePlace.hasOwnProperty('opening_hours')) {
+        open_now = googlePlace.opening_hours.open_now;
+    }
+
+    return new Place(
+        lat, lng, name, suburb, address, image,
+        description, open_now, null, null, null, null
+    );
+}
+
+/**
+ * Make Foursquare search API request for bike shops near the users selected location.
+ * @function getFourSqrVenues
+ */
+function getFourSqrVenues() {
+    var request = $.ajax('https://api.foursquare.com/v2/venues/search', {
+        dataType: 'json',
+        data: {
+            client_id: tokens.fourSquareTokens.clientId,
+            client_secret: tokens.fourSquareTokens.clientSecret,
+            ll: getMapCenterCoords().lat.toString() + ',' + getMapCenterCoords().lng.toString(),
+            query: 'bicycle',
+            v: 20160310,
+        },
+    });
+    request.done(fourSqrCB);
+    request.fail(fourSqrFailCB);
+}
+
+/**
+ * Callback function from request made by getFourSqrVenues. For each place in results
+ * create Place, setup marker and infoWindow. Finally, update viewModel.placesArray
+ * from placesObject.
+ * @function fourSqrCB
+ * @param {object} jqXHR - The results object from the jQuery AJAX request.
+ */
+function fourSqrCB(jqXHR) {
+    jqXHR.response.venues.forEach(function(venue) {
+        // Don't keep results that don't include an address and city.
+        // Could determine this from coords, but all results
+        // without an address contain very little information
+        // and are hard to use with other API results.
+        if (venue.location.hasOwnProperty('address') && venue.location.hasOwnProperty('city')) {
+            var place = fourSqrVenueToPlace(venue);
+            place.createMarker();
+            place.addInfoWindow(place);
+            addPlaceToPlacesObject(place);
+        }
+    });
+    updatePlacesArray();
+    viewModel.fourSqrFail(false);
+}
+
+/**
+ * Callback function if the Foursquare AJAX request fails. Shows fail message on page.
+ * function fourSqrFailCB
+ */
+function fourSqrFailCB() {
+    console.log('Foursquare ajax failed');
+    viewModel.fourSqrFail(true);
+}
+
+/**
+ * Convert result from Foursquare search API to a Place object.
+ * function fourSqrVenueToPlace
+ * @param {object} venue - Single result object from Foursquare search API.
+ */
+function fourSqrVenueToPlace(venue) {
+    var lat = venue.location.lat;
+    var lng = venue.location.lng;
+    var name = venue.name;
+    var suburb = fixSuburb(venue.location.city.split(',')[0].trim());
+    var address = fixAddress(venue.location.address) + ', ' + suburb;
+
+    var phone;
+    if (venue.hasOwnProperty('contact') && venue.contact.hasOwnProperty('formattedPhone')) {
+        phone = venue.contact.formattedPhone;
+    }
+
+    var description;
+    // create place description from catagories
+    if (venue.categories.length > 0) {
+        description = venue.categories[0].name;
+        if (venue.categories.length > 1) {
+            for (var i = 1; i > venue.categories.length - 1; i++) {
+                description += ', ' + venue.categories[i];
+            }
+            description += ' and ' + venue.categories[venue.categories.length - 1];
+        }
+    }
+
+    var fourSquareUrl = 'https://foursquare.com/v/' + venue.id + '?ref=' + tokens.fourSquareTokens.clientId;
+
+    return new Place(
+        lat, lng, name, suburb, address, null, description,
+        null, phone, fourSquareUrl, null, null
+    );
+}
+
+/**
+ * Make Yelp search API request for bike shops near the users selected location. This API requires
+ * OAuth 1.0, so signature mus be generated before making request.
+ * OAuth functions courtesy of MarkN from Udacity forums
+ * {@link https://discussions.udacity.com/t/how-to-make-ajax-request-to-yelp-api/13699/5}
+ * and Marco Bettiolo's Javascript OAuth Signature Generator
+ * {@link https://github.com/bettiolo/oauth-signature-js}
+ * @function getYelpBusinesses
+ */
+function getYelpBusinesses() {
+    var yelpUrl = 'https://api.yelp.com/v2/search';
+    var parameters = {
+        oauth_consumer_key: tokens.yelpTokens.consumerKey,
+        oauth_token: tokens.yelpTokens.token,
+        oauth_nonce: Math.floor(Math.random() * 1e12).toString(),
+        oauth_timestamp: Math.floor(Date.now()/1000),
+        oauth_signature_method: 'HMAC-SHA1',
+        oauth_version: '1.0',
+        term: 'bicycle_store',
+        cll: getMapCenterCoords().lat.toString() + ',' + getMapCenterCoords().lng.toString(),
+        location: getMapCenterName(),
+        callback: 'cb' // Include for jsonp implementation in AJAX or else the oauth-signature will be wrong.
+    };
+    // Generate the oauthSignature for these parameters
+    parameters.oauth_signature = oauthSignature.generate(
+        'GET',
+        yelpUrl,
+        parameters,
+        tokens.yelpTokens.consumerSecret,
+        tokens.yelpTokens.tokenSecret
+    );
+
+    // Send the API reqest
+    var request = $.ajax({
+        url: yelpUrl,
+        data: parameters,
+        cache: true, // Include to prevent jQuery adding a cache-buster parameter "_=23489489749837", invalidating our oauth-signature
+        dataType: 'jsonp',
+    });
+    request.done(yelpCB);
+    request.fail(yelpFailCB);
+}
+
+/**
+ * Callback function from request made by getYelpBusinesses. For each place in results
+ * create Place, setup marker and infoWindow. Finally, update viewModel.placesArray
+ * from placesObject.
+ * @function yelpCB
+ * @param {object} jqXHR - The results object from the jQuery AJAX request.
+ */
+function yelpCB(jqXHR) {
+    jqXHR.businesses.forEach(function(business) {
+        // Don't keep results that don't include an address.
+        // Could determine this from coords, but all results
+        // without an address contain very little information,
+        // and are hard to use with other API results.
+        if (business.location.hasOwnProperty('address') && business.location.address.length > 0) {
+            var place = yelpBusToPlace(business);
+            place.createMarker();
+            place.addInfoWindow();
+            addPlaceToPlacesObject(place);
+        }
+    });
+    updatePlacesArray();
+    viewModel.yelpFail(false);
+}
+
+/**
+ * Callback function if the Yelp AJAX request fails. Shows fail message on page.
+ * function yelpFailCB
+ */
+function yelpFailCB() {
+    console.log('yelp ajax failed');
+    viewModel.yelpFail(true);
+}
+
+/**
+ * Convert result from Yelp search API to a Place object.
+ * function yelpBusToPlace
+ * @param {object} business - Single result object from Yelp search API.
+ */
+function yelpBusToPlace(business) {
+    var lat = business.location.coordinate.latitude;
+    var lng = business.location.coordinate.longitude;
+    var name = business.name;
+    var suburb = fixSuburb(business.location.city);
+    var address = fixAddress(business.location.address[0]) + ', ' + suburb;
+
+    var image;
+    if (business.hasOwnProperty('image_url')) {
+        image = business.image_url;
+    }
+
+    var description;
+    // create place description from catagories
+    if (business.hasOwnProperty('catagories') && business.categories.length > 0) {
+        description = business.categories[0][0];
+        if (business.categories.length > 1) {
+            for (var i = 1; i > business.categories.length - 1; i++) {
+                description += ', ' + business.categories[i][0];
+            }
+            description += ' and ' + business.categories[business.categories.length - 1];
+        }
+    }
+
+    var phone = business.phone;
+
+    var yelpSnippet;
+    if (business.hasOwnProperty('snippet_text')) {
+        yelpSnippet = business.snippet_text;
+    }
+
+    var yelpUrl = business.url;
+
+    return new Place(
+        lat, lng, name, suburb, address, image, description,
+        null, phone, null, yelpSnippet, yelpUrl
+    );
+}
+
+/**
+ * Util functions
+ */
+
+/**
+ * Function to remove minor differences in addresses, which prevent results
+ * for the same place from different APIs from matching.
+ * @function fixAddress
+ */
+function fixAddress(address) {
+    address = address.replace('.', '');
+    address = address.replace(/St$/, 'Street');
+    address = address.replace(/Rd$/, 'Road');
+    return address;
+}
+
+/**
+ *Function to remove minor differences in suburb,
+ * which prevent results for the same place from different
+ * APIs from matching.
+ */
+function fixSuburb(suburb) {
+    suburb = suburb.replace('.', '');
+    // Fix abreviation of Saint Kilda
+    suburb = suburb.replace('St', 'Saint');
+    return suburb;
+}
+
+return exports;
+});

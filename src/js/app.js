@@ -80,7 +80,7 @@ function Place(
  * @memberof module:app.Place#
  */
 Place.prototype.createMarker = function() {
-    if (mapIcons.load != 'fail') {
+    if (mapIcons.load !== 'fail') {
         this.marker = new mapIcons.Marker({
             position: this.latLng,
             map: map,
@@ -104,7 +104,7 @@ Place.prototype.createMarker = function() {
  */
 Place.prototype.addInfoWindow = function() {
     // If mapIcons failed to load Marker will not exist so don't add infoWindow
-    if (mapIcons.load != 'fail') {
+    if (mapIcons.load !== 'fail') {
         this.infoWindow = new google.maps.InfoWindow();
         this.updateInfoWindowContent();
         var self = this;
@@ -291,7 +291,9 @@ function setTextClear() {
         t.next('span').toggle(Boolean(t.val()));
     });
 
-    $(".clearer").hide($(this).prev('input').val());
+    $(".clearer").hide(function() {
+        $(this).prev('input').val();
+    });
 
     $(".clearer").click(function () {
         viewModel.searchTextFilter('');
@@ -381,7 +383,7 @@ function createMap() {
     var centerLocationCoords = getMapCenterCoords();
     var centerLocationName = getMapCenterName();
     viewModel.searchLocation(centerLocationName);
-    if (google.load != 'fail') {
+    if (google.load !== 'fail') {
         map = new google.maps.Map(document.getElementById('map'), {
             center: centerLocationCoords,
             scrollwheel: true,
@@ -400,7 +402,7 @@ function createMap() {
  * @function
  */
 function addAutocomplete() {
-    if (google.load != 'fail') {
+    if (google.load !== 'fail') {
         var locationInput = $('#location-input')[0];
         // Setup Autocomplete, with the regions parameter set.
         var autocomplete = new google.maps.places.Autocomplete(locationInput, {types: ['(regions)']});
@@ -496,7 +498,7 @@ function getGooglePlaces() {
  * @param {string} status - The status of the Google Places API results.
  */
 function googlePlacesCBs(results, status) {
-    if (status == google.maps.places.PlacesServiceStatus.OK) {
+    if (status === google.maps.places.PlacesServiceStatus.OK) {
         results.forEach(function(result) {
             var place = googlePlaceToPlace(result);
             place.createMarker();

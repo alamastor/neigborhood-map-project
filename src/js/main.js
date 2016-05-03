@@ -30,8 +30,8 @@ define('mapIcons', ['../../lib/js/map-icons.min'], function() {
     return {
         Marker: Marker,
         MAP_PIN: MAP_PIN,
-    }
-})
+    };
+});
 
 // Call bootstrap to force it to load and be used.
 requirejs(['bootstrap'], function() {});
@@ -41,7 +41,7 @@ function(         $,     app) {
     $(app.init());
 }, function(err) {
     console.log(err);
-    if (err.requireModules.indexOf("async!https://maps.googleapis.com/maps/api/js?libraries=places_unnormalized2") != -1) {
+    if (err.requireModules.indexOf("async!https://maps.googleapis.com/maps/api/js?libraries=places_unnormalized2") !== -1) {
         // Couldn't get google maps library, will have to disable most functionality.
         // Alternative would be to fall back to local version of the library,
         // but the library has other external depencies, which would also have to be

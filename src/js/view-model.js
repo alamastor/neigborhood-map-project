@@ -4,7 +4,7 @@
  * @module view-model
  */
 define(['knockout', 'require'], function(ko, require) {
-    'use strict'
+    'use strict';
     function ViewModel() {
         var self = this;
 
@@ -92,10 +92,10 @@ define(['knockout', 'require'], function(ko, require) {
             // For each place check if it passes filter.
             self.places().forEach(function(place) {
                 // If there is a suburb filter check it matches place.
-                var suburbOK = self.suburbFilter() === '' || place.suburb == self.suburbFilter();
+                var suburbOK = self.suburbFilter() === '' || place.suburb === self.suburbFilter();
                 // Check the first part of the string matches the search text.
                 var strLen = self.searchTextFilter().length;
-                var searchTextOK = place.longName().slice(0, strLen).toLowerCase() == self.searchTextFilter().toLowerCase();
+                var searchTextOK = place.longName().slice(0, strLen).toLowerCase() === self.searchTextFilter().toLowerCase();
                 if (suburbOK && searchTextOK) {
                     // Passed filter, add to array and show marker.
                     filtered.push(place);
@@ -135,7 +135,7 @@ define(['knockout', 'require'], function(ko, require) {
          */
         self.toggleNav = function() {
             self.hideNav(!self.hideNav());
-        }
+        };
 
 
 
@@ -155,7 +155,7 @@ define(['knockout', 'require'], function(ko, require) {
             if (self.autoCompHighlightItem()) {
                 // On submit, if an autocomplete item is highlighted, then use it
                 self.autoCompSelect(self.autoCompHighlightItem());
-            } else if (self.filteredPlaces().length == 1) {
+            } else if (self.filteredPlaces().length === 1) {
                 // If there's only one place in the filter list, then accept it
                 self.autoCompSelect(self.filteredPlaces()[0]);
             } else {
@@ -273,9 +273,9 @@ define(['knockout', 'require'], function(ko, require) {
             }
 
             // Change index based on direction of movement.
-            if (dir == 'up') {
+            if (dir === 'up') {
                 itemIndex--;
-            } else if (dir == 'down') {
+            } else if (dir === 'down') {
                 itemIndex++;
             } else {
                 console.log('!! got unexpected input to moveAutoCompHighlight');
