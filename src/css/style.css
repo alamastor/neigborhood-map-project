@@ -1,6 +1,7 @@
-html, body {
+html,
+body {
   height: 100%;
-  font-family: 'Quattrocento Sans', sans-serif;
+  font-family: "Quattrocento Sans" sans-serif;
 }
 
 main {
@@ -13,14 +14,14 @@ main {
 
 
 /* Header and nav */
-#header-text {
-  font: normal 1.5em 'Quattrocento Sans', sans-serif;
+.title-text {
+  font: normal 1.5em "Quattrocento Sans", sans-serif;
   color: darkslategrey;
   display: flex;
   margin: 1em;
 }
 
-#header-text-main {
+.title-text-main {
   font: normal 2em Yesteryear, sans-serif;
   color: midnightblue;
   line-height: 0;
@@ -29,7 +30,7 @@ main {
   width: 6.4em;
 }
 
-#header-text-loc {
+.title-text-loc {
   height: 1.5em;
   padding-top: 0.2em;
   margin: 0;
@@ -39,7 +40,7 @@ main {
   overflow: hidden;
 }
 
-#header-nav {
+.header-nav {
   margin-bottom: 0;
   z-index: 1;
   background-color: lightgrey;
@@ -53,16 +54,16 @@ main {
     top: 92px;
   }
 
-  #header-text {
+  .title-text {
     flex-direction: column;
     padding: 0;
   }
 
-  #header-text-main {
+  .title-text-main {
     font-size: 1.2em;
   }
 
-  #header-text-loc {
+  .title-text-loc {
     font-size: 0.8em;
   }
 }
@@ -74,7 +75,7 @@ main {
 
 
 /* Location input */
-#location-input {
+.location-input {
   margin-left: 0;
 }
 
@@ -86,19 +87,19 @@ main {
 
 
 /* Map */
-#map {
+.map {
   height: 100%;
   width: 75%;
 }
 @media (max-width: 767px) {
-  #map {
+  .map {
     width: 100%;
   }
 }
 
 
 /* Main places list */
-#places {
+.places {
   width: 25%;
   list-style-type: none;
   overflow-y: scroll;
@@ -207,7 +208,7 @@ footer {
 
 /* Info window */
 .info-window-body {
-  font-family: 'Quattrocento Sans';
+  font-family: "Quattrocento Sans";
   display: flex;
   vertical-align: middle;
 }

@@ -5,26 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8">
   <link href="lib/css/bootstrap.min.css" rel=stylesheet>
-  <link href='https://fonts.googleapis.com/css?family=Quattrocento+Sans%7cYesteryear' rel='stylesheet' type='text/css'>
+  <link href="https://fonts.googleapis.com/css?family=Quattrocento+Sans%7cYesteryear" rel="stylesheet">
   <link href="css/style.css" rel=stylesheet>
   <link href="lib/css/map-icons.min.css" rel=stylesheet>
   <link rel="icon" type="image/png" href="images/favicon.ico" />
 </head>
 <body>
   <!-- Nav Bar -->
-  <nav class="navbar navbar-default" id="header-nav">
+  <nav class="navbar navbar-default header-nav">
     <div class="container-fluid">
-      <div class="navbar-header">
+      <div class="navbar-title">
         <button type="button" class="navbar-toggle collapsed" data-bind="click: toggleNav">
           <span class="sr-only"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <!-- Nav Header -->
-        <div id="header-text" class="navbar-brand">
-          <h1 id="header-text-main">Local Bike Shops</h1>
-          <h2 id="header-text-loc" data-bind="text: searchLocation"></h2>
+        <!-- Nav Title -->
+        <div class="navbar-brand title-text">
+          <h1 class="title-text-main">Local Bike Shops</h1>
+          <h2 class="title-text-loc" data-bind="text: searchLocation"></h2>
         </div>
       </div>
 
@@ -63,11 +63,11 @@
           </ul>
         </div>
         <!-- Location Input -->
-        <input type="text" class="form-control navbar-form navbar-right" id="location-input"
+        <input type="text" class="form-control navbar-form navbar-right location-input"
           placeholder="Your Location"
           data-bind="textInput: locationInput" />
         <!-- Mobile Place list -->
-        <ul id="nav-places" class="visible-xs" data-bind="foreach: filteredPlaces">
+        <ul class="visible-xs nav-places" data-bind="foreach: filteredPlaces">
           <li class="nav-place" data-bind="click: $parent.selectPlace">
             <p class="place-name" data-bind="text: $data.name"></p>
             <p class="place-suburb" data-bind="text: $data.suburb"></p>
@@ -79,19 +79,19 @@
 
   <main>
     <!-- Main Places List -->
-    <ul id="places" class="hidden-xs" data-bind="foreach: filteredPlaces">
+    <ul class="hidden-xs places" data-bind="foreach: filteredPlaces">
       <li class="place" data-bind="click: $parent.selectPlace">
         <p class="place-name" data-bind="text: $data.name"></p>
         <p class="place-suburb" data-bind="text: $data.suburb"></p>
       </li>
     </ul>
     <!-- Google Map -->
-    <div id="map"></div>
+    <div class="map" id="map"></div>
   </main>
 
   <!-- Footer -->
   <footer class="container-fluid">
-    <div id="attrib" class="row">
+    <div class="row attrib">
       <div class="api-attrib col-sm-4">
         <span data-bind="visible: googleFail" class="fail-text">Could not connect to Google.</span>
         <img src="images/powered_by_google_on_white.png" alt="Google attrib image">
