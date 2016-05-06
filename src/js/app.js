@@ -689,7 +689,7 @@ function getYelpBusinesses() {
     // Setup JSONP timeout for failed requests
     var yelpRequestTimeout = setTimeout(function() {
         if (!yelpSuccess) {
-            console.log('yelp ajax failed');
+            console.log('yelp ajax timeout');
             viewModel.yelpFail(true);
         }
     }, 8000);
